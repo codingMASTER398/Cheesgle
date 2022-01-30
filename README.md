@@ -5,3 +5,5 @@ If you want to run it yourself, go ahead. There isn't much documentation about h
 It's some pretty bad code, so be prepared.
 
 Have fun!
+
+*note: meta tags and the favicon is not set up for the pages here.*
