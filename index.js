@@ -14,7 +14,7 @@ const blockUrlsThatInclude = ['facebook.com/c','twitter.com/share','creativecomm
 
 const siteCap = 50000 // Maximum amount of pages that can be stored. If the amount of sites stored goes over this, adding pages to the queue won't work until pages are removed to go under this limit or the limit is increased.
 
-const maxConnections = 500 // Maximum connections the crawler can have at once (see npm package "crawler"). More than 1000 can slow the site when crawling. 500 is reccomended.
+const maxConnections = 500000 // Maximum pages that can be crawled each time the program is run. This doesn't include pages that are actaully saved, so keep it high.
 
 const queueSuccessfulMessage = `We have queued the page successfully, and will now attempt to crawl it. If we are successful, the page should appear in search results in ~10 minutes. Thank you for your input. You can now go back to Cheesgle.`
 
