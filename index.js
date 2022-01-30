@@ -8,7 +8,7 @@ const reliableLimitPer10Minutes = 1000 // The limit of pages that can be queued 
 
 const pageSize = 15 // How many results to show for each page
 
-const host = `https://cheesgle.codingmaster398.repl.co/` // Where cheesgle is being hosted
+const host = `https://cheesgle.com/` // Where cheesgle is being hosted
 
 const blockUrlsThatInclude = ['facebook.com/c','twitter.com/share','creativecommons','t/contact_us','new/new'] // Any URLS with this inside them will not be able to be queued
 
@@ -25,6 +25,19 @@ const sumbitPageRateLimit = rateLimit({
 	max: 100,
 	message:
 		"This IP has requested we crawl a bunch of websites, and under the rules of this Cheesgle's owner, we're gonna block you from adding any more for a bit.",
+	standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+	legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+})
+
+const searchRateLimit = rateLimit({
+	windowMs: 60 * 1000, // 1 Minute
+	max: 25,
+	message:
+		JSON.stringify({
+    "error":true,
+    "reason":"Stop spamming ):<",
+    "code":"spam"
+  }),
 	standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
 	legacyHeaders: false, // Disable the `X-RateLimit-*` headers
 })
@@ -66,6 +79,10 @@ var crawling = {}
 function truncate(str, n){
   return (str.length > n) ? str.substr(0, n-1) + '...' : str;
 };
+
+function getRandomInt(min, max) {
+    return min + Math.floor(Math.random() * (max - min + 1));
+}
 
 function crawlXml(url) {
   const sitemapXMLParser = new SitemapXMLParser(url, {
@@ -181,6 +198,7 @@ function queue(h,sub){
   return new Promise(async(resolve,reject)=>{
 
     if(h.substring(0, h.indexOf('#')) !== ''){h=h.substring(0, h.indexOf('#'))}
+    if(h.substring(0, h.indexOf('?')) !== ''){h=h.substring(0, h.indexOf('?'))}
 
     h=h.replace("http://","https://")
 
@@ -233,7 +251,7 @@ function queue(h,sub){
       }else{
         reject(`The robots.txt file of that website doesn't allow the us to crawl that page.`)
       }
-    }).catch(()=>{reject(`Something went wrong.`)})
+    }).catch((e)=>{reject(`Something went wrong: ${e}`)})
     
   })
 }
@@ -286,7 +304,7 @@ function chunk (arr, len) { // Chunk function from stackoverflow
 
   return chunks;
 }
-
+app.use('/api/',searchRateLimit)
 app.get('/api/:query/:page*?', cors(), (req, res) => {
   var { query, page } = req.params
 
@@ -336,6 +354,21 @@ app.get('/api/:query/:page*?', cors(), (req, res) => {
   let results = resp.length
 
   let resultsJson = []
+
+  if(getRandomInt(1,100) == 50){
+    resultsJson.push({
+      "href":"https://cheesgle.com/Add/add.html",
+      "title":"Not what you're looking for?",
+      "description":"Add a page to cheesgle!"
+    })
+  }
+  if(getRandomInt(1,100) == 69){
+    resultsJson.push({
+      "href":"https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      "title":protect(query),
+      "description":protect(query)
+    })
+  }
 
   for (let i = 0; i < results; i++) {
     resultsJson.push({
@@ -408,7 +441,23 @@ app.get('/pageCount',(req,res)=>{
   }
 })
 
+app.get('/github',(req,res)=>{
+  res.redirect("https://github.com/codingMASTER398/Cheesgle")
+})
+
 app.use(express.static("./public"))
+
+app.get("/search",(req,res)=>{
+  if(req.query.q){
+    res.redirect("/Search/search.html?q="+req.query.q)
+  }else{
+    res.redirect("/")
+  }
+})
+
+app.get('*',(req,res)=>{
+  res.end('<h1>404</h1><br>Mouldy cheese?')
+})
 
 app.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`)
