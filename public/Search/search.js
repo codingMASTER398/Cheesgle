@@ -76,10 +76,10 @@ if(!isNaN(Number(page))){
     ${results}
     <div class="page">
         <p>Page ${json.page}/${json.pages} <br> 
-            <button onclick='window.location.href="search.html?q=${query}"'><i class="fa-solid fa-angles-left"></i></button>
-            <button onclick='window.location.href="search.html?q=${query}&page=${json.page-1}"'><i class="fa-solid fa-angle-left"></i></button> 
-            <button onclick='window.location.href="search.html?q=${query}&page=${json.page+1}"'><i class="fa-solid fa-angle-right"></i></button> 
-            <button onclick='window.location.href="search.html?q=${query}&page=${json.pages}"'><i class="fa-solid fa-angles-right"></i></button>
+            <button onclick='window.location.href="search.html?q=${query.split(" ").join("%20")}"'><i class="fa-solid fa-angles-left"></i></button>
+            <button onclick='window.location.href="search.html?q=${query.split(" ").join("%20")}&page=${json.page-1}"'><i class="fa-solid fa-angle-left"></i></button> 
+            <button onclick='window.location.href="search.html?q=${query.split(" ").join("%20")}&page=${json.page+1}"'><i class="fa-solid fa-angle-right"></i></button> 
+            <button onclick='window.location.href="search.html?q=${query.split(" ").join("%20")}&page=${json.pages}"'><i class="fa-solid fa-angles-right"></i></button>
         </p>
     </div>
     <br><br>`
