@@ -16,7 +16,7 @@ const siteCap = 50000 // Maximum amount of pages that can be stored. If the amou
 
 const maxConnections = 500 // Maximum connections the crawler can have at once (see npm package "crawler"). More than 1000 can slow the site when crawling. 500 is reccomended.
 
-const queueSuccessfulMessage = `We have queued the page successfully, and will now attempt to crawl it. If we are successful, the page should appear in search results in ~10 minutse. Thank you for your input. You can now go back to Cheesgle.`
+const queueSuccessfulMessage = `We have queued the page successfully, and will now attempt to crawl it. If we are successful, the page should appear in search results in ~10 minutes. Thank you for your input. You can now go back to Cheesgle.`
 
 const rateLimit = require('express-rate-limit')
 
@@ -91,17 +91,15 @@ function crawlXml(url) {
   });
   sitemapXMLParser.fetch().then(result => {
       result.forEach(thing =>{
-        if(thing.loc[0])queue(thing.loc[0])
+        if(thing.loc[0])queue(thing.loc[0],{"userAgent":"Cheesgle-crawlie"})
       })
   }).catch(()=>{});
 }
  
 var c = new Crawler({
   maxConnections : maxConnections,
-  "userAgent":"Cheesgle-crawlie",
-  "options":{
-    "userAgent":"Cheesgle-crawlie"
-  },
+  timeout:3000,
+  retries:0,
     callback : function (error, res, done) {
         if(!error){
           if(res.statusCode!==200)return
@@ -155,7 +153,7 @@ var c = new Crawler({
                   href=new URL(res.request.uri.href+href).href
                 }
                 try{
-                  queue(href)
+                  queue(href,{"userAgent":"Cheesgle-crawlie"})
                 }catch(e){}
               }
             })
@@ -189,7 +187,7 @@ setInterval(() => {
   if(db.sites.length > siteCap){
     canqueue = false
   }else{
-    console.log(`${db.sites.length} stored, (${noCrawl.length} noCrawl)`)
+    console.log(`${db.sites.length} stored, (${noCrawl.length} noCrawl, queue size ${c.queueSize})`)
   }
   fs.writeFileSync("./db.txt",jsonpack.pack(db))
 }, 30000);
@@ -204,9 +202,9 @@ function queue(h,sub){
 
     h=h.replace(/(https?:\/\/)|(\/)+/g, "$1$2");
 
-    if(h.slice(-1) !== "/")h+='/'
+    if(h.slice(-1) !== "/")h+="/";
 
-    if(h.startsWith('https://www.youtube.com/watch?v=')&&h.includes("/new/")){reject('Youtube.com watch URL that has /new/ in it. That can lead to spam of /new/ URLs.');return}
+    if(h.startsWith('https://www.youtube.com')&&h.includes("/new/")){reject('Youtube.com watch URL that has /new/ in it. That can lead to spam of /new/ URLs.');return}
 
     if(!sub){
       if(noCrawl.includes(new URL(h).href)){reject("noCrawl includes the URL, will queue if it's sumbitted by a user.");return}
@@ -246,7 +244,7 @@ function queue(h,sub){
     canCrawl(h).then(function(can){
       if(can){
         console.log(`Crawling ${h}`)
-        c.queue(h);
+        c.queue(h,{"userAgent":"Cheesgle-crawlie"});
         resolve()
       }else{
         reject(`The robots.txt file of that website doesn't allow the us to crawl that page.`)
@@ -260,7 +258,7 @@ function queue(h,sub){
 
 [].forEach(element=>{crawlXml(element)});
 
-[].forEach(element=>{queue(element)}); // Replace the starting array (e.g ['https://site.one/','https://site.two/'])
+[].forEach(element=>{queue(element,{"userAgent":"Cheesgle-crawlie"})}); // Replace the starting array (e.g ['https://site.one/','https://site.two/'])
 
 
 /* Searching and refreshing collection */
@@ -320,12 +318,44 @@ app.get('/api/:query/:page*?', cors(), (req, res) => {
     "code":"query"
   }));return}
 
+  if(query.length > 1000){
+    res.status(400);res.end(JSON.stringify({
+      "error":true,
+      "reason":"Stop it",
+      "code":"tooLong"
+    }));return
+  }
+
   if(query.length > 500){
+    res.status(400);res.end(JSON.stringify({
+      "error":true,
+      "reason":"Shut up",
+      "code":"tooLong"
+    }));return
+  }
+
+  if(query.length > 200){
     res.status(400);res.end(JSON.stringify({
       "error":true,
       "reason":"Query too long",
       "code":"tooLong"
     }));return
+  }
+
+  if(query.startsWith("bramley")){
+    res.end(JSON.stringify({
+      "error":false,
+      "resultsCount":1,
+      "timeInMs":69,
+      "results":[{
+        "href":"https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+        "title":protect("Bramley's favourite song"),
+        "description":protect("Bramley loves this | 2022 confirmed bramley best song!!1!")
+      }],
+      "pages":1,
+      "page":1
+    }))
+    return
   }
 
   const time1 = performance.now(); // Gets the current time in ms
@@ -355,7 +385,7 @@ app.get('/api/:query/:page*?', cors(), (req, res) => {
 
   let resultsJson = []
 
-  if(getRandomInt(1,100) == 50){
+  if(getRandomInt(1,50) == 42){
     resultsJson.push({
       "href":"https://cheesgle.com/Add/add.html",
       "title":"Not what you're looking for?",
@@ -390,7 +420,7 @@ app.get('/api/:query/:page*?', cors(), (req, res) => {
 
 app.use('/Search/search.html', function (req, res, next) {
   if(!req.query.q){
-    res.redirect('/Search/search.html?q=what')
+    res.redirect('/Search/search.html?q=look%20bud%20you%20need%20to%20give%20me%20a%20question')
     return
   }
   next()
@@ -401,7 +431,7 @@ app.use('/submitSite', sumbitPageRateLimit)
 app.post('/submitSite',bodyParser.json(),async(req,res)=>{
   if(req.body.url){
     if(req.body.url.startsWith("https://")){
-      queue(req.body.url,true).then(()=>{
+      queue(req.body.url,true,{"userAgent":"Cheesgle-crawlie"}).then(()=>{
         res.end(queueSuccessfulMessage)
       }).catch((e)=>{
         res.end(`There was an error while trying to queue that page: ${e}`)
@@ -453,6 +483,11 @@ app.get("/search",(req,res)=>{
   }else{
     res.redirect("/")
   }
+})
+
+var randomCheese = require('cheese-name');
+app.get("/randomCheese",(req,res)=>{
+  res.redirect("/Search/search.html?q="+randomCheese())
 })
 
 app.get('*',(req,res)=>{
