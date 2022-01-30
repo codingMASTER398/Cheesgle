@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8">
+  <title>Cheesgle</title>
+  <meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Cheesgle | World's worst cheesey search engine</title><link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/normalize/7.0.0/normalize.min.css'><link rel="stylesheet" href="./style.css">
+
+</head>
+<body>
+<!-- partial:index.partial.html -->
+<div class="main">
+		
+		<!-- Home Page -->
+
+		<div class="home">
+			<div class="container">
+				<div class="row">
+					<div class="eight columns offset-by-two">
+						<img src="./Img/cheesgle_long.png">
+					</div>
+				</div>
+
+				<div class="row">
+					<div class="eight columns offset-by-two">
+						<form action="Search/search.html" class="wiki-search-form" method="GET">
+							<input type="search" placeholder="Regret..." class="wiki-search-input" id="wiki-search-input" name="q">
+							<button class="button btn btn-wiki">Cheesgle Search</button>
+							<a class="button btn btn-lucky" href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" target="_blank">I'm Feeling Cheesy</a>
+						</form>
+						<p>The world's best worst search engine.</p>
+						<p id="websites"></p>
+						<script>
+							fetch("./pageCount").then(async function(r) {
+								document.getElementById("websites").innerText = await r.text()
+							})
+						</script>
+					</div>
+				</div>
+				</div>
+			</div>
+    </div>
+	</div>
+<!-- partial -->
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js'></script>
+</body>
+</html>
