@@ -5,6 +5,7 @@
   "main": "index.js",
   "dependencies": {
     "body-parser": "^1.19.1",
+    "cheese-name": "^2.0.1",
     "cors": "^2.8.5",
     "crawler": "^1.3.0",
     "express": "^4.17.2",
