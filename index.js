@@ -14,9 +14,9 @@ const blockUrlsThatInclude = ['facebook.com/c','twitter.com/share','creativecomm
 
 const siteCap = 50000 // Maximum amount of pages that can be stored. If the amount of sites stored goes over this, adding pages to the queue won't work until pages are removed to go under this limit or the limit is increased.
 
-const maxConnections = 500000 // Maximum pages that can be crawled each time the program is run. This doesn't include pages that are actaully saved, so keep it high.
+const maxConnections = 10 // See https://github.com/bda-research/node-crawler
 
-const queueSuccessfulMessage = `We have queued the page successfully, and will now attempt to crawl it. If we are successful, the page should appear in search results in ~10 minutes. Thank you for your input. You can now go back to Cheesgle.`
+const queueSuccessfulMessage = `NOTICE: There is an issue with crawling right now. (https://github.com/bda-research/node-crawler/issues/406) We have queued the page successfully, and will now attempt to crawl it. If we are successful, the page should appear in search results in ~10 minutes. Thank you for your input. You can now go back to Cheesgle.`
 
 const rateLimit = require('express-rate-limit')
 
@@ -201,8 +201,6 @@ function queue(h,sub){
     h=h.replace("http://","https://")
 
     h=h.replace(/(https?:\/\/)|(\/)+/g, "$1$2");
-
-    if(h.slice(-1) !== "/")h+="/";
 
     if(h.startsWith('https://www.youtube.com')&&h.includes("/new/")){reject('Youtube.com watch URL that has /new/ in it. That can lead to spam of /new/ URLs.');return}
 
@@ -453,7 +451,7 @@ Keep in mind, these conditions must be met for the page to be crawled.<br>
   <li>Host websites can only have ${nonReliableLimitPer10Minutes} of it's pages crawled every 10 minutes. For <a href="../Verified/about.html">verified</a> websites, the limit is ${reliableLimitPer10Minutes}.</li>
   <li>The URL cannot be over 150 characters in length.</li>
   <li>The page cannot be crawled in the past 30 minutes.</li>
-  <li>The crawler can only have ${maxConnections} connections open at a time. See the <a href="https://www.npmjs.com/package/crawler">crawler package</a> for more info on that.</li>
+  <li>There is hardly any guarantee that crawling will work or add your page. All settings the cheesgle operator has chosen apply. See our GitHub for the default settings (the one cheesgle.com uses)</li>
 </ul>
 <br>
 Ready to add a page to this useless search engine? Go ahead! The form is below.`)
