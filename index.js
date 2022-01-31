@@ -16,7 +16,7 @@ const siteCap = 50000 // Maximum amount of pages that can be stored. If the amou
 
 const maxConnections = 10 // See https://github.com/bda-research/node-crawler
 
-const queueSuccessfulMessage = `NOTICE: There is an issue with crawling right now. (https://github.com/bda-research/node-crawler/issues/406) We have queued the page successfully, and will now attempt to crawl it. If we are successful, the page should appear in search results in ~10 minutes. Thank you for your input. You can now go back to Cheesgle.`
+const queueSuccessfulMessage = `NOTICE: A recent change in our systems may make crawling unstable. I will update this notice if everything goes ok after a while. We have queued the page successfully, and will now attempt to crawl it. If we are successful, the page should appear in search results in ~10 minutes. Thank you for your input. You can now go back to Cheesgle.`
 
 const rateLimit = require('express-rate-limit')
 
@@ -48,7 +48,8 @@ const SitemapXMLParser = require('sitemap-xml-parser');
 const robotsParser = require('robots-txt-parser');
 const {performance} = require('perf_hooks');
 var jsonpack = require("jsonpack")
-var Crawler = require("crawler");
+const cheerio = require('cheerio');
+const axios = require('axios');
 const Fuse = require('fuse.js')
 var fs = require("fs")
 
@@ -96,71 +97,69 @@ function crawlXml(url) {
   }).catch(()=>{});
 }
  
-var c = new Crawler({
-  maxConnections : maxConnections,
-  timeout:3000,
-  retries:0,
-    callback : function (error, res, done) {
-        if(!error){
-          if(res.statusCode!==200)return
-          if(!res.$)return
-            var $ = res.$;
+var c = {
+    queue: function(url){
+      axios.get(url,{ headers: { 'User-Agent': 'Cheesgle-crawlie' }  }).then((response)=>{
 
-            let title = "No title"
-            let desc = "No description"
-            let keywords = []
+        if(response.status === 200) {
+          if(typeof response.data !== "string")return
+          const html = response.data;
+          const $ = cheerio.load(html); 
 
-            try{
-              title = truncate($("title").first().text().replace(/&nbsp;/g," "),60) || "No title"
-              desc = truncate($("meta[name=description]").attr("content").replace(/&nbsp;/g," "),200)||"No description"
-              keywords = $("meta[name=keywords]").attr("content").split(",").slice(0,20) || []
-            }catch{}
+          let title = "No title"
+          let desc = "No description"
+          let keywords = []
 
-            if(typeof title !== 'string') title = "No title"
-            if(typeof desc !== 'string') desc = "No description"
-            if(keywords == "") keywords = ["cheese"]
+          try{
+            title = truncate($("title").first().text().replace(/&nbsp;/g," "),60) || "No title"
+            desc = truncate($("meta[name=description]").attr("content").replace(/&nbsp;/g," "),200)||"No description"
+            keywords = $("meta[name=keywords]").attr("content").split(",").slice(0,20) || []
+          }catch{}
 
-            let cheeseRating = 0
-            cheeseRating+=((title.toLowerCase().match(/cheese/g) || []).length)*60;
-            cheeseRating+=((desc.toLowerCase().match(/cheese/g) || []).length)*24;
-            keywords.forEach(element => {
-              cheeseRating+=((element.toLowerCase().match(/cheese/g) || []).length)*9;
-            })
+          if(typeof title !== 'string') title = "No title"
+          if(typeof desc !== 'string') desc = "No description"
+          if(keywords == "") keywords = ["cheese"]
 
-            if(cheeseRating < 10)return
+          let cheeseRating = 0
+          cheeseRating+=((title.toLowerCase().match(/cheese/g) || []).length)*60;
+          cheeseRating+=((desc.toLowerCase().match(/cheese/g) || []).length)*24;
+          keywords.forEach(element => {
+            cheeseRating+=((element.toLowerCase().match(/cheese/g) || []).length)*9;
+          })
+          if(cheeseRating < 10)return
 
-            noCrawl=noCrawl.filter(function(item) {
-                return item !== new URL(res.request.uri.href).href
-            })
+          noCrawl=noCrawl.filter(function(item) {
+              return item !== new URL(url).href
+          })
 
-            db.sites = db.sites.filter(item => item.u !== new URL(res.request.uri.href).href);
+          db.sites = db.sites.filter(item => item.u !== new URL(url).href);
 
-            db.sites.push({
-              "t":title,
-              "dc":desc,
-              "kw":keywords.join(", "),
-              "u":new URL(res.request.uri.href).href
-            })
-            db.list[new URL(res.request.uri.href).href] = Date.now()
+          db.sites.push({
+            "t":title,
+            "dc":desc,
+            "kw":keywords.join(", "),
+            "u":new URL(url).href
+          })
+          db.list[new URL(url).href] = Date.now()
 
-            links = $('a');
-            $(links).each((i,link)=>{
-              if(!$(link).attr("href"))return
-              let href = $(link).attr("href")
-              if(href!=="#" && !href.startsWith("/?") && !href.startsWith("?")){
-                //if(href.startsWith("."))href=href.substring(1);
-                if(!href.startsWith("http")){
-                  href=new URL(res.request.uri.href+href).href
-                }
-                try{
-                  queue(href,{"userAgent":"Cheesgle-crawlie"})
-                }catch(e){}
+          links = $('a');
+          $(links).each((i,link)=>{
+            if(!$(link).attr("href"))return
+            let href = $(link).attr("href")
+            if(href!=="#" && !href.startsWith("/?") && !href.startsWith("?")){
+              //if(href.startsWith("."))href=href.substring(1);
+              if(!href.startsWith("http")){
+                href=new URL(url+href).href
               }
-            })
+              try{
+                queue(href,{"userAgent":"Cheesgle-crawlie"})
+              }catch(e){}
+            }
+          })
         }
-        done();
+      }).catch(()=>{})
     }
-});
+};
  
 function canCrawl(h){
   return new Promise((resolve,reject)=>{
@@ -187,7 +186,7 @@ setInterval(() => {
   if(db.sites.length > siteCap){
     canqueue = false
   }else{
-    console.log(`${db.sites.length} stored, (${noCrawl.length} noCrawl, queue size ${c.queueSize})`)
+    console.log(`${db.sites.length} stored, (${noCrawl.length} noCrawl)`)
   }
   fs.writeFileSync("./db.txt",jsonpack.pack(db))
 }, 30000);
@@ -302,6 +301,14 @@ function chunk (arr, len) { // Chunk function from stackoverflow
 }
 app.use('/api/',searchRateLimit)
 app.get('/api/:query/:page*?', cors(), (req, res) => {
+
+  /*res.status(503);res.end(JSON.stringify({
+    "error":true,
+    "reason":"Maintenace is underway. Sorry for the inconvenicence.",
+    "code":"maintenance"
+  }));return*/
+
+
   var { query, page } = req.params
 
   if(isNaN(Number(page))){
@@ -383,7 +390,7 @@ app.get('/api/:query/:page*?', cors(), (req, res) => {
 
   let resultsJson = []
 
-  if(getRandomInt(1,50) == 42){
+  if(getRandomInt(1,25) == 20){
     resultsJson.push({
       "href":"https://cheesgle.com/Add/add.html",
       "title":"Not what you're looking for?",
@@ -427,19 +434,32 @@ app.use('/Search/search.html', function (req, res, next) {
 app.use('/submitSite', sumbitPageRateLimit)
 
 app.post('/submitSite',bodyParser.json(),async(req,res)=>{
-  if(req.body.url){
-    if(req.body.url.startsWith("https://")){
-      queue(req.body.url,true,{"userAgent":"Cheesgle-crawlie"}).then(()=>{
-        res.end(queueSuccessfulMessage)
-      }).catch((e)=>{
-        res.end(`There was an error while trying to queue that page: ${e}`)
-      })
+  try{
+    setTimeout(()=>{
+      if(!res.writableEnded){
+        res.end(`This is taking too long. There is a chance the site will still be crawled, but because of how long it's taking, I don't think so. Try again!`)
+      }
+    },5000)
+
+    if(req.body.url){
+      if(req.body.url.startsWith("https://")){
+        if(req.body.url.endsWith('.xml')){
+          crawlXml(req.body.url)
+          res.end(`Looks like you gave us an XML, so we are assuming that's just a sitemap. We put it through our sitemap crawler, so hopefully that does something and doesn't break the website. (:`)
+          return
+        }
+        queue(req.body.url,true,{"userAgent":"Cheesgle-crawlie"}).then(()=>{
+          res.end(queueSuccessfulMessage)
+        }).catch((e)=>{
+          res.end(`There was an error while trying to queue that page: ${e}`)
+        })
+      }else{
+        res.end("We need the URL to start with https://")
+      }
     }else{
-      res.end("We need the URL to start with https://")
+      res.end("An URL is needed")
     }
-  }else{
-    res.end("An URL is needed")
-  }
+  }catch{} // Random try catch just in case
 })
 
 app.get('/submitSiteInfo',cors(),(req,res)=>{
@@ -489,6 +509,7 @@ app.get("/randomCheese",(req,res)=>{
 })
 
 app.get('*',(req,res)=>{
+  res.status(404)
   res.end('<h1>404</h1><br>Mouldy cheese?')
 })
 
