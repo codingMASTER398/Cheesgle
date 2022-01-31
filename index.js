@@ -16,7 +16,7 @@ const siteCap = 50000 // Maximum amount of pages that can be stored. If the amou
 
 const maxConnections = 10 // See https://github.com/bda-research/node-crawler
 
-const queueSuccessfulMessage = `We have queued the page successfully, and will now attempt to crawl it. We go through the queue of sites to crawl every 100ms, so if another site is already crawling, it might take a bit. Thank you for your input. You can now go back to Cheesgle.`
+const queueSuccessfulMessage = `We have queued the page successfully, and will now attempt to crawl it. We go through the queue of sites to crawl every 300ms, so if another site is already crawling, it might take a bit. Thank you for your input. You can now go back to Cheesgle.`
 
 const rateLimit = require('express-rate-limit')
 
@@ -92,7 +92,7 @@ function crawlXml(url) {
   });
   sitemapXMLParser.fetch().then(result => {
       result.forEach(thing =>{
-        if(thing.loc[0])queue(thing.loc[0],{"userAgent":"Cheesgle-crawlie"})
+        if(thing.loc[0])queue(thing.loc[0],{"userAgent":"Cheesgle-crawlie"},true)
       })
   }).catch(()=>{});
 }
@@ -104,7 +104,7 @@ setInterval(()=>{
     actualQueue(siteQueue[0])
     siteQueue.shift()
   }
-},100)
+},300)
 
 function actualQueue(url){
   console.log(`Crawling ${url}`)
@@ -205,7 +205,7 @@ setInterval(() => {
   fs.writeFileSync("./db.txt",jsonpack.pack(db))
 }, 30000);
 
-function queue(h,sub){
+function queue(h,smh,sub){
   return new Promise(async(resolve,reject)=>{
 
     if(h.substring(0, h.indexOf('#')) !== ''){h=h.substring(0, h.indexOf('#'))}
@@ -461,7 +461,7 @@ app.post('/submitSite',bodyParser.json(),async(req,res)=>{
           res.end(`Looks like you gave us an XML, so we are assuming that's just a sitemap. We put it through our sitemap crawler, so hopefully that does something and doesn't break the website. (:`)
           return
         }
-        queue(req.body.url,true,{"userAgent":"Cheesgle-crawlie"}).then(()=>{
+        queue(req.body.url,"a",true).then(()=>{
           res.end(queueSuccessfulMessage)
         }).catch((e)=>{
           res.end(`There was an error while trying to queue that page: ${e}`)
