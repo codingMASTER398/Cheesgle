@@ -16,7 +16,7 @@ const siteCap = 50000 // Maximum amount of pages that can be stored. If the amou
 
 const maxConnections = 10 // See https://github.com/bda-research/node-crawler
 
-const queueSuccessfulMessage = `NOTICE: A recent change in our systems may make crawling unstable. I will update this notice if everything goes ok after a while. We have queued the page successfully, and will now attempt to crawl it. If we are successful, the page should appear in search results in ~10 minutes. Thank you for your input. You can now go back to Cheesgle.`
+const queueSuccessfulMessage = `We have queued the page successfully, and will now attempt to crawl it. We go through the queue of sites to crawl every 100ms, so if another site is already crawling, it might take a bit. Thank you for your input. You can now go back to Cheesgle.`
 
 const rateLimit = require('express-rate-limit')
 
@@ -31,7 +31,7 @@ const sumbitPageRateLimit = rateLimit({
 
 const searchRateLimit = rateLimit({
 	windowMs: 60 * 1000, // 1 Minute
-	max: 25,
+	max: 35,
 	message:
 		JSON.stringify({
     "error":true,
@@ -97,67 +97,81 @@ function crawlXml(url) {
   }).catch(()=>{});
 }
  
+const siteQueue = []
+
+setInterval(()=>{
+  if(siteQueue.length > 0){
+    actualQueue(siteQueue[0])
+    siteQueue.shift()
+  }
+},100)
+
+function actualQueue(url){
+  console.log(`Crawling ${url}`)
+  axios.get(url,{ headers: { 'User-Agent': 'Cheesgle-crawlie' }  }).then((response)=>{
+
+    if(response.status === 200) {
+      if(typeof response.data !== "string")return
+      const html = response.data;
+      const $ = cheerio.load(html); 
+
+      let title = "No title"
+      let desc = "No description"
+      let keywords = []
+
+      try{
+        title = truncate($("title").first().text().replace(/&nbsp;/g," "),60) || "No title"
+        desc = truncate($("meta[name=description]").attr("content").replace(/&nbsp;/g," "),200)||"No description"
+        keywords = $("meta[name=keywords]").attr("content").split(",").slice(0,20) || []
+      }catch{}
+
+      if(typeof title !== 'string') title = "No title"
+      if(typeof desc !== 'string') desc = "No description"
+      if(keywords == "") keywords = ["cheese"]
+
+      let cheeseRating = 0
+      cheeseRating+=((title.toLowerCase().match(/cheese/g) || []).length)*60;
+      cheeseRating+=((desc.toLowerCase().match(/cheese/g) || []).length)*24;
+      keywords.forEach(element => {
+        cheeseRating+=((element.toLowerCase().match(/cheese/g) || []).length)*9;
+      })
+      if(cheeseRating < 10)return
+
+      noCrawl=noCrawl.filter(function(item) {
+          return item !== new URL(url).href
+      })
+
+      db.sites = db.sites.filter(item => item.u !== new URL(url).href);
+
+      db.sites.push({
+        "t":title,
+        "dc":desc,
+        "kw":keywords.join(", "),
+        "u":new URL(url).href
+      })
+      db.list[new URL(url).href] = Date.now()
+
+      links = $('a');
+      $(links).each((i,link)=>{
+        if(!$(link).attr("href"))return
+        let href = $(link).attr("href")
+        if(href!=="#" && !href.startsWith("/?") && !href.startsWith("?")){
+          //if(href.startsWith("."))href=href.substring(1);
+          if(!href.startsWith("http")){
+            href=new URL(url+href).href
+          }
+          try{
+            queue(href,{"userAgent":"Cheesgle-crawlie"})
+          }catch(e){}
+        }
+      })
+    }
+  }).catch(()=>{})
+}
+
 var c = {
     queue: function(url){
-      axios.get(url,{ headers: { 'User-Agent': 'Cheesgle-crawlie' }  }).then((response)=>{
-
-        if(response.status === 200) {
-          if(typeof response.data !== "string")return
-          const html = response.data;
-          const $ = cheerio.load(html); 
-
-          let title = "No title"
-          let desc = "No description"
-          let keywords = []
-
-          try{
-            title = truncate($("title").first().text().replace(/&nbsp;/g," "),60) || "No title"
-            desc = truncate($("meta[name=description]").attr("content").replace(/&nbsp;/g," "),200)||"No description"
-            keywords = $("meta[name=keywords]").attr("content").split(",").slice(0,20) || []
-          }catch{}
-
-          if(typeof title !== 'string') title = "No title"
-          if(typeof desc !== 'string') desc = "No description"
-          if(keywords == "") keywords = ["cheese"]
-
-          let cheeseRating = 0
-          cheeseRating+=((title.toLowerCase().match(/cheese/g) || []).length)*60;
-          cheeseRating+=((desc.toLowerCase().match(/cheese/g) || []).length)*24;
-          keywords.forEach(element => {
-            cheeseRating+=((element.toLowerCase().match(/cheese/g) || []).length)*9;
-          })
-          if(cheeseRating < 10)return
-
-          noCrawl=noCrawl.filter(function(item) {
-              return item !== new URL(url).href
-          })
-
-          db.sites = db.sites.filter(item => item.u !== new URL(url).href);
-
-          db.sites.push({
-            "t":title,
-            "dc":desc,
-            "kw":keywords.join(", "),
-            "u":new URL(url).href
-          })
-          db.list[new URL(url).href] = Date.now()
-
-          links = $('a');
-          $(links).each((i,link)=>{
-            if(!$(link).attr("href"))return
-            let href = $(link).attr("href")
-            if(href!=="#" && !href.startsWith("/?") && !href.startsWith("?")){
-              //if(href.startsWith("."))href=href.substring(1);
-              if(!href.startsWith("http")){
-                href=new URL(url+href).href
-              }
-              try{
-                queue(href,{"userAgent":"Cheesgle-crawlie"})
-              }catch(e){}
-            }
-          })
-        }
-      }).catch(()=>{})
+      siteQueue.push(url)
     }
 };
  
@@ -240,7 +254,6 @@ function queue(h,sub){
 
     canCrawl(h).then(function(can){
       if(can){
-        console.log(`Crawling ${h}`)
         c.queue(h,{"userAgent":"Cheesgle-crawlie"});
         resolve()
       }else{
