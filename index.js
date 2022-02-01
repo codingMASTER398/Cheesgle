@@ -229,6 +229,16 @@ function queue(h,smh,sub){
       if((new Date() - new Date(db.list[new URL(h).href])) < 1800000) reject("That page was crawled in the past 30 minutes.");return
     }
 
+    if(h.endsWith("/")){
+      if(db.list[h.slice(0, -1)]){
+        if((new Date() - new Date(db.list[h.slice(0, -1)])) < 1800000) reject("Duplicate entry of that page without a slash")
+      }
+    }else{
+      if(db.list[h+"/"]){
+        if((new Date() - new Date(db.list[h+"/"])) < 1800000) reject("Duplicate entry of that page with a slash")
+      }
+    }
+
     if(crawling[new URL(h).host]){
 
       if(reliableSites.includes(crawling[new URL(h).host])){
@@ -399,6 +409,14 @@ app.get('/api/:query/:page*?', (req, res) => {
   let results = resp.length
 
   let resultsJson = []
+
+  if(query.toLowerCase() == "cheese"){
+    resultsJson.push({
+      "href":host,
+      "title":"Try searching something else",
+      "description":"Searching 'cheese' can often lead to spam. Try searching something else, like 'toe cheese' perhaps."
+    })
+  }
 
   if(query.startsWith("hello")){
     resultsJson.push({
