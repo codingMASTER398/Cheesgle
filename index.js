@@ -16,7 +16,9 @@ const siteCap = 50000 // Maximum amount of pages that can be stored. If the amou
 
 const maxConnections = 10 // See https://github.com/bda-research/node-crawler
 
-const queueSuccessfulMessage = `We have queued the page successfully, and will now attempt to crawl it. The queue is currently queuesize page(s) long, and we go through each page in the queue at a rate of 300ms. Thank you for your input. You can now go back to Cheesgle.`
+const queueSuccessfulMessage = `We have queued the page successfully, and will now *attempt* to crawl it. The queue is currently queuesize page(s) long, and we go through each page in the queue at a rate of 300ms. Thank you for your input. You can now go back to Cheesgle.`
+
+const queryParameterNoCutoff = ["youtube.com"] // Site hosts that don't have the ? query parameters cut off
 
 const rateLimit = require('express-rate-limit')
 
@@ -204,7 +206,7 @@ function queue(h,smh,sub){
   return new Promise(async(resolve,reject)=>{
 
     if(h.substring(0, h.indexOf('#')) !== ''){h=h.substring(0, h.indexOf('#'))}
-    if(h.substring(0, h.indexOf('?')) !== ''){h=h.substring(0, h.indexOf('?'))}
+    if(!queryParameterNoCutoff.includes(new URL(h).host)){if(h.substring(0, h.indexOf('?')) !== ''){h=h.substring(0, h.indexOf('?'))}}
 
     h=h.replace("http://","https://")
 
@@ -254,7 +256,7 @@ function queue(h,smh,sub){
       }else{
         reject(`The robots.txt file of that website doesn't allow the us to crawl that page.`)
       }
-    }).catch((e)=>{reject(`Something went wrong: ${e}`)})
+    }).catch((e)=>{reject(`That site doesn't have a robots.txt file.`)})
     
   })
 }
@@ -308,7 +310,7 @@ function chunk (arr, len) { // Chunk function from stackoverflow
   return chunks;
 }
 app.use('/api/',searchRateLimit)
-app.get('/api/:query/:page*?', cors(), (req, res) => {
+app.get('/api/:query/:page*?', (req, res) => {
 
   /*res.status(503);res.end(JSON.stringify({
     "error":true,
@@ -409,8 +411,8 @@ app.get('/api/:query/:page*?', cors(), (req, res) => {
   if(getRandomInt(1,25) == 20){
     resultsJson.push({
       "href":"https://cheesgle.com/Add/add.html",
-      "title":"Not what you're looking for?",
-      "description":"Add a page to cheesgle!"
+      "title":"<b>Not what you're looking for?</b>",
+      "description":"<b>Add a page to cheesgle! It won't take a second, I promise.</b>"
     })
   }
   if(getRandomInt(1,100) == 69){
@@ -478,7 +480,7 @@ app.post('/submitSite',bodyParser.json(),async(req,res)=>{
   }catch{} // Random try catch just in case
 })
 
-app.get('/submitSiteInfo',cors(),(req,res)=>{
+app.get('/submitSiteInfo',(req,res)=>{
   res.end(`<h1><b>Page submission</b></h1><br>
 Here you can submit a URL for us to crawl and add to our engine.<br>
 Keep in mind, these conditions must be met for the page to be crawled.<br>
@@ -493,7 +495,7 @@ Keep in mind, these conditions must be met for the page to be crawled.<br>
 Ready to add a page to this useless search engine? Go ahead! The form is below.`)
 })
 
-app.get('/Verified/list.json',cors(),(req,res)=>{
+app.get('/Verified/list.json',(req,res)=>{
   res.end(JSON.stringify(reliableSites))
 })
 
@@ -503,6 +505,10 @@ app.get('/pageCount',(req,res)=>{
   }else{
     res.end(`Cheesgle has capped out at ${db.sites.length} pages and no more can be added for the time being.`)
   }
+})
+
+app.get('/queueSize',(req,res)=>{
+  res.end(`Queue size is currently ${siteQueue.length} page(s) long.`)
 })
 
 app.get('/github',(req,res)=>{
