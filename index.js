@@ -16,9 +16,9 @@ const siteCap = 50000 // Maximum amount of pages that can be stored. If the amou
 
 const maxConnections = 10 // See https://github.com/bda-research/node-crawler
 
-const queueSuccessfulMessage = `We have queued the page successfully, and will now *attempt* to crawl it. The queue is currently queuesize page(s) long, and we go through each page in the queue at a rate of 300ms. Thank you for your input. You can now go back to Cheesgle.`
+const queueSuccessfulMessage = `We have queued the page successfully, and will now *attempt* to crawl it. The queue is currently queuesize page(s) long, and we go through each page in the queue at a rate of 500ms. Thank you for your input. You can now go back to Cheesgle.`
 
-const queryParameterNoCutoff = ["youtube.com"] // Site hosts that don't have the ? query parameters cut off
+const queryParameterNoCutoff = ["youtube.com","www.youtube.com"] // Site hosts that don't have the ? query parameters cut off
 
 const rateLimit = require('express-rate-limit')
 
@@ -106,7 +106,7 @@ setInterval(()=>{
     actualQueue(siteQueue[0])
     siteQueue.shift()
   }
-},300)
+},500)
 
 function actualQueue(url){
   url = new URL(url).href
@@ -550,7 +550,7 @@ app.get("/randomCheese",(req,res)=>{
 
 app.get('*',(req,res)=>{
   res.status(404)
-  res.end('<h1>404</h1><br>Mouldy cheese?')
+  res.sendfile("./public/404.html")
 })
 
 app.listen(port, () => {
