@@ -21,6 +21,7 @@ const queueSuccessfulMessage = `We have queued the page successfully, and will n
 const queryParameterNoCutoff = ["youtube.com","www.youtube.com"] // Site hosts that don't have the ? query parameters cut off
 
 const rateLimit = require('express-rate-limit')
+const requestIp = require('request-ip');
 
 const sumbitPageRateLimit = rateLimit({
 	windowMs: 60 * 60 * 1000, // 1 hour
@@ -29,6 +30,9 @@ const sumbitPageRateLimit = rateLimit({
 		"This IP has requested we crawl a bunch of websites, and under the rules of this Cheesgle's owner, we're gonna block you from adding any more for a bit.",
 	standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
 	legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+  keyGenerator: (req, res) => {
+    return req.clientIp
+  }
 })
 
 const searchRateLimit = rateLimit({
@@ -42,6 +46,9 @@ const searchRateLimit = rateLimit({
   }),
 	standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
 	legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+  keyGenerator: (req, res) => {
+    return req.clientIp
+  }
 })
 
 /* Requiring and init of database */
@@ -297,6 +304,8 @@ const cors = require('cors');
 const app = express()
 const port = 3000
 
+app.use(requestIp.mw());
+
 app.use(express.urlencoded({
   extended: true
 }))
@@ -335,8 +344,6 @@ app.get('/api/:query/:page*?', (req, res) => {
     page = 1
   }
 
-  console.log(`Query: ${query}`)
-
   if(!query){res.status(400);res.end(JSON.stringify({
     "error":true,
     "reason":"Query needed",
@@ -366,6 +373,10 @@ app.get('/api/:query/:page*?', (req, res) => {
       "code":"tooLong"
     }));return
   }
+
+  let censoredIp = req.clientIp.split(".");censoredIp[censoredIp.length-1] = "#";censoredIp[censoredIp.length-2] = "#";censoredIp=censoredIp.join(".");
+
+  console.log(`From: ${censoredIp} Query: ${query}`)
 
   if(query.startsWith("bramley")){
     res.end(JSON.stringify({
@@ -471,20 +482,25 @@ app.use('/submitSite', sumbitPageRateLimit)
 
 app.post('/submitSite',bodyParser.json(),async(req,res)=>{
   try{
+
     setTimeout(()=>{
       if(!res.writableEnded){
         res.end(`This is taking too long. There is a chance the site will still be crawled, but because of how long it's taking, I don't think so. Try again!`)
       }
     },5000)
 
+    let censoredIp = req.clientIp.split(".");censoredIp[censoredIp.length-1] = "#";censoredIp[censoredIp.length-2] = "#";censoredIp=censoredIp.join(".")
+
     if(req.body.url){
       if(req.body.url.startsWith("https://")){
         if(req.body.url.endsWith('.xml')){
           crawlXml(req.body.url)
           res.end(`Looks like you gave us an XML, so we are assuming that's just a sitemap. We put it through our sitemap crawler, so hopefully that does something and doesn't break the website. (:`)
+          console.log(`${censoredIp} submitted ${req.body.url} as a sitemap`)
           return
         }
         queue(req.body.url,"a",true).then(()=>{
+          console.log(`${censoredIp} submitted ${req.body.url} as a page`)
           res.end(queueSuccessfulMessage.replace("queuesize",siteQueue.length))
         }).catch((e)=>{
           res.end(`There was an error while trying to queue that page: ${e}`)
