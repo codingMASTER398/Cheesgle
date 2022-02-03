@@ -200,15 +200,28 @@ var canqueue = true
 if(db.sites.length > siteCap){
   canqueue = false
 }
-setInterval(() => {
-  //if(db.sites.length > 250000){
-  if(db.sites.length > siteCap){
-    canqueue = false
-  }else{
-    console.log(`${db.sites.length} stored, (${noCrawl.length} noCrawl)`)
-  }
-  fs.writeFile("./db.txt",jsonpack.pack(db),()=>{console.log("done!")})
-}, 600000);
+
+var siteSlowing = false
+
+function saveDatabaseAndSlowSite(){
+  siteSlowing = true
+
+  console.log("Site slowing warning issued")
+
+  setTimeout(()=>{
+    //if(db.sites.length > 250000){
+    if(db.sites.length > siteCap){
+      canqueue = false
+    }else{
+      console.log(`Saving database. ${db.sites.length} stored, (${noCrawl.length} noCrawl)`)
+    }
+    fs.writeFileSync("./db.txt",jsonpack.pack(db))
+    console.log("Done, warning taken away.")
+    siteSlowing = false
+    setTimeout(saveDatabaseAndSlowSite, db.sites.length*22);
+  },40000)
+}
+setTimeout(saveDatabaseAndSlowSite, db.sites.length*22);
 
 function queue(h,smh,sub){
   return new Promise(async(resolve,reject)=>{
@@ -441,6 +454,14 @@ app.get('/api/:query/:page*?', (req, res) => {
   let results = resp.length
 
   let resultsJson = []
+
+  if(siteSlowing){
+    resultsJson.push({
+      "href":host,
+      "title":"<b>Database is/will be stored soon! Expect slowness.</b>",
+      "description":"Heya, we are now/about to save the database to db.txt. The site may go offline or slow lots during this. Shouldn't take long, just letting you know!"
+    })
+  }
 
   if(query.toLowerCase() == "cheese"){
     resultsJson.push({
