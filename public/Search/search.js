@@ -69,8 +69,13 @@ if(!isNaN(Number(page))){
         <p class="urlText">${protect(element.href)}</p>
     </div><br>`
         }
+
+        let didYouMean = ""
+        if(query !== json.didYouMean){
+          didYouMean = `<h3>Did you meen <a href="search.html?q=${encodeURIComponent(json.didYouMean)}">${json.didYouMean}</a>?</h3>`
+        }
     
-        let resultsHtml = `<div class="topResults">${json.resultsCount} results for ${protect(query)} found in ${json.timeInMs}ms.</p>
+        let resultsHtml = `<div class="topResults">${json.resultsCount} results for ${protect(query)} found in ${json.timeInMs}ms.</p>${didYouMean}
     </div>
     <br>
     ${results}
