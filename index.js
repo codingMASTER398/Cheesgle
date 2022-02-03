@@ -56,10 +56,11 @@ const searchRateLimit = rateLimit({
 const SitemapXMLParser = require('sitemap-xml-parser');
 const robotsParser = require('robots-txt-parser');
 const {performance} = require('perf_hooks');
-var jsonpack = require("jsonpack")
 const cheerio = require('cheerio');
-const axios = require('axios');
 const Fuse = require('fuse.js')
+const axios = require('axios');
+var jsonpack = require("jsonpack")
+var Typo = require("typo-js");
 var fs = require("fs")
 
 /* DB init */
@@ -304,13 +305,22 @@ const cors = require('cors');
 const app = express()
 const port = 3000
 
-var http = require('http');
-var https = require('https');
+//Init Typo
+var dictionary = new Typo("en_US");
 
-http.globalAgent.maxSockets = Infinity;
-https.globalAgent.maxSockets = Infinity;
+// app.use(something)
 
 app.on("/index.html",(req,res)=>{res.redirect("/")})
+
+// Adding this before express.static
+
+app.use('/Search/search.html', function (req, res, next) {
+  if(!req.query.q){
+    res.redirect('/Search/search.html?q=look%20bud%20you%20need%20to%20give%20me%20a%20question')
+    return
+  }
+  next()
+})
 
 app.use(express.static("./public/"))
 
@@ -393,6 +403,7 @@ app.get('/api/:query/:page*?', (req, res) => {
       "error":false,
       "resultsCount":1,
       "timeInMs":69,
+      "didYouMean":"bed monster",
       "results":[{
         "href":"https://www.youtube.com/watch?v=dQw4w9WgXcQ",
         "title":protect("Bramley's favourite song"),
@@ -470,22 +481,27 @@ app.get('/api/:query/:page*?', (req, res) => {
     })
   }
 
+  // Typo checking
+  let checkingQuery = query.split(" ")
+  let outFromTheCheckingLab = []
+  checkingQuery.forEach((element)=>{
+    let suggest = dictionary.suggest(element)
+    if(suggest.length>0){
+      outFromTheCheckingLab.push(suggest[0])
+    }else{
+      outFromTheCheckingLab.push(element)
+    }
+  })
+
   res.end(JSON.stringify({
     "error":false,
     "resultsCount":allResults,
     "timeInMs":timeTook,
     "results":resultsJson,
     "pages":pages,
-    "page":page
+    "page":page,
+    "didYouMean":protect(outFromTheCheckingLab.join(" "))
   }))
-})
-
-app.use('/Search/search.html', function (req, res, next) {
-  if(!req.query.q){
-    res.redirect('/Search/search.html?q=look%20bud%20you%20need%20to%20give%20me%20a%20question')
-    return
-  }
-  next()
 })
 
 app.use('/submitSite', sumbitPageRateLimit)
