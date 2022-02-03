@@ -16,7 +16,7 @@ const siteCap = 50000 // Maximum amount of pages that can be stored. If the amou
 
 const maxConnections = 10 // See https://github.com/bda-research/node-crawler
 
-const queueSuccessfulMessage = `We have queued the page successfully, and will now *attempt* to crawl it. The queue is currently queuesize page(s) long, and we go through each page in the queue at a rate of 500ms. Thank you for your input. You can now go back to Cheesgle.`
+const queueSuccessfulMessage = `We have queued the page successfully, and will now *attempt* to crawl it. The queue is currently queuesize page(s) long, and we go through each page in the queue at a rate of 600ms. Thank you for your input. You can now go back to Cheesgle.`
 
 const queryParameterNoCutoff = ["youtube.com","www.youtube.com"] // Site hosts that don't have the ? query parameters cut off
 
@@ -113,7 +113,7 @@ setInterval(()=>{
     actualQueue(siteQueue[0])
     siteQueue.shift()
   }
-},500)
+},600)
 
 function actualQueue(url){
   url = new URL(url).href
@@ -206,8 +206,8 @@ setInterval(() => {
   }else{
     console.log(`${db.sites.length} stored, (${noCrawl.length} noCrawl)`)
   }
-  fs.writeFileSync("./db.txt",jsonpack.pack(db))
-}, 30000);
+  fs.writeFile("./db.txt",jsonpack.pack(db),()=>{console.log("done!")})
+}, 600000);
 
 function queue(h,smh,sub){
   return new Promise(async(resolve,reject)=>{
@@ -303,6 +303,16 @@ const { time } = require('console');
 const cors = require('cors');
 const app = express()
 const port = 3000
+
+var http = require('http');
+var https = require('https');
+
+http.globalAgent.maxSockets = Infinity;
+https.globalAgent.maxSockets = Infinity;
+
+app.on("/index.html",(req,res)=>{res.redirect("/")})
+
+app.use(express.static("./public/"))
 
 app.use(requestIp.mw());
 
@@ -549,8 +559,6 @@ app.get('/github',(req,res)=>{
   res.redirect("https://github.com/codingMASTER398/Cheesgle")
 })
 
-app.use(express.static("./public"))
-
 app.get("/search",(req,res)=>{
   if(req.query.q){
     res.redirect("/Search/search.html?q="+req.query.q)
@@ -563,6 +571,7 @@ var randomCheese = require('cheese-name');
 app.get("/randomCheese",(req,res)=>{
   res.redirect("/Search/search.html?q="+randomCheese())
 })
+
 
 app.get('*',(req,res)=>{
   res.status(404)
