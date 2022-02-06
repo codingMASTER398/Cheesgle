@@ -16,7 +16,7 @@ const siteCap = 50000 // Maximum amount of pages that can be stored. If the amou
 
 const maxConnections = 10 // See https://github.com/bda-research/node-crawler
 
-const queueSuccessfulMessage = `We have queued the page successfully, and will now *attempt* to crawl it. The queue is currently queuesize page(s) long, and we go through each page in the queue at a rate of 600ms. Thank you for your input. You can now go back to Cheesgle.`
+const queueSuccessfulMessage = `We have queued the page successfully, and will now *attempt* to crawl it. The queue is currently queuesize page(s) long, and we go through each page in the queue at a rate of 300ms. Thank you for your input. You can now go back to Cheesgle.`
 
 const queryParameterNoCutoff = ["youtube.com","www.youtube.com"] // Site hosts that don't have the ? query parameters cut off
 
@@ -55,9 +55,8 @@ const searchRateLimit = rateLimit({
 
 const SitemapXMLParser = require('sitemap-xml-parser');
 const robotsParser = require('robots-txt-parser');
-const {performance} = require('perf_hooks');
+const { Worker } = require('worker_threads');
 const cheerio = require('cheerio');
-const Fuse = require('fuse.js')
 const axios = require('axios');
 var jsonpack = require("jsonpack")
 var Typo = require("typo-js");
@@ -114,7 +113,7 @@ setInterval(()=>{
     actualQueue(siteQueue[0])
     siteQueue.shift()
   }
-},600)
+},300)
 
 function actualQueue(url){
   url = new URL(url).href
@@ -201,27 +200,22 @@ if(db.sites.length > siteCap){
   canqueue = false
 }
 
-var siteSlowing = false
-
-function saveDatabaseAndSlowSite(){
-  siteSlowing = true
-
-  console.log("Site slowing warning issued")
-
-  setTimeout(()=>{
-    //if(db.sites.length > 250000){
+function saveDatabase(){
     if(db.sites.length > siteCap){
       canqueue = false
     }else{
       console.log(`Saving database. ${db.sites.length} stored, (${noCrawl.length} noCrawl)`)
+
+      var saverWorker = new Worker('./saveDatabase.js', { 
+        workerData: db
+      });
+      saverWorker.once('message', () => {
+        console.log("Saved database")
+        setTimeout(saveDatabase, 240000);
+      })
     }
-    fs.writeFileSync("./db.txt",jsonpack.pack(db))
-    console.log("Done, warning taken away.")
-    siteSlowing = false
-    setTimeout(saveDatabaseAndSlowSite, db.sites.length*22);
-  },40000)
 }
-setTimeout(saveDatabaseAndSlowSite, db.sites.length*22);
+setTimeout(saveDatabase, 240000);
 
 function queue(h,smh,sub){
   return new Promise(async(resolve,reject)=>{
@@ -298,17 +292,6 @@ function queue(h,smh,sub){
 
 [].forEach(element=>{queue(element,{"userAgent":"Cheesgle-crawlie"})}); // Replace the starting array (e.g ['https://site.one/','https://site.two/'])
 
-
-/* Searching and refreshing collection */
-
-var search = new Fuse(db.sites, {
-  keys: ['t', 'dc','kw'],
-  threshold:0.4
-})
-setInterval(() => {
-  search.setCollection(db.sites)
-}, 60000);
-
 /* Web app logic, starting with requiring express and other middleware */
 
 var bodyParser = require('body-parser')
@@ -329,7 +312,7 @@ app.on("/index.html",(req,res)=>{res.redirect("/")})
 
 app.use('/Search/search.html', function (req, res, next) {
   if(!req.query.q){
-    res.redirect('/Search/search.html?q=look%20bud%20you%20need%20to%20give%20me%20a%20question')
+    res.redirect('/Search/search.html?q=question%20here')
     return
   }
   next()
@@ -349,20 +332,10 @@ function protect(text) { // Replaces stuff with stuff
   return text.replace(/&/g, "&amp;").replace(/>/g, "&gt;").replace(/</g, "&lt;").replace(/"/g, "&quot;").replace(/&nbsp;/g," ");
 }
 
-function chunk (arr, len) { // Chunk function from stackoverflow
-
-  var chunks = [],
-      i = 0,
-      n = arr.length;
-
-  while (i < n) {
-    chunks.push(arr.slice(i, i += len));
-  }
-
-  return chunks;
-}
 app.use('/api/',searchRateLimit)
 app.get('/api/:query/:page*?', (req, res) => {
+
+  res.setHeader('content-type', 'application/json');
 
   /*res.status(503);res.end(JSON.stringify({
     "error":true,
@@ -376,6 +349,8 @@ app.get('/api/:query/:page*?', (req, res) => {
   if(isNaN(Number(page))){
     page = 1
   }
+
+  console.log(`Processing query: ${query}`)
 
   if(!query){res.status(400);res.end(JSON.stringify({
     "error":true,
@@ -399,23 +374,22 @@ app.get('/api/:query/:page*?', (req, res) => {
     }));return
   }
 
-  if(query.length > 200){
+  if(query.length > 30){
+    console.log(`Query too long for '${query}'`)
     res.status(400);res.end(JSON.stringify({
       "error":true,
-      "reason":"Query too long",
+      "reason":"Query too long, please have a query under 30 characters long.",
       "code":"tooLong"
     }));return
   }
 
   let censoredIp = req.clientIp.split(".");censoredIp[censoredIp.length-1] = "#";censoredIp[censoredIp.length-2] = "#";censoredIp=censoredIp.join(".");
 
-  console.log(`From: ${censoredIp} Query: ${query}`)
-
   if(query.startsWith("bramley")){
     res.end(JSON.stringify({
       "error":false,
       "resultsCount":1,
-      "timeInMs":69,
+      "timeInSeconds":42.69,
       "didYouMean":"bed monster",
       "results":[{
         "href":"https://www.youtube.com/watch?v=dQw4w9WgXcQ",
@@ -430,99 +404,94 @@ app.get('/api/:query/:page*?', (req, res) => {
 
   const time1 = performance.now(); // Gets the current time in ms
 
-  var resp = search.search(query) // Search with query
-  const allResults = resp.length
-  resp=chunk(resp,pageSize) // Chunk into pages
-  const pages = resp.length
+  const worker = new Worker('./search.js', { 
+      workerData: {
+        db:db.sites,
+        query:query,
+        page:page,
+        pageSize:pageSize
+      }
+  });
+  worker.once('message', (result) => {
+    var {resp,allResults,pages,timeTook} = result
 
-  if(page>pages || page<1){page=1};page=Math.round(page);
-
-  resp=resp[page-1]
-
-  const timeTook = Math.round(performance.now()-time1)
-
-  if(resp == undefined){
-    res.status(204)
-    res.end(JSON.stringify({
-      "error":true,
-      "reason":"No results found",
-      "code":"noResults"
-    }))
-    return
-  }
-
-  let results = resp.length
-
-  let resultsJson = []
-
-  if(siteSlowing){
-    resultsJson.push({
-      "href":host,
-      "title":"<b>Database is/will be stored soon! Expect slowness.</b>",
-      "description":"Heya, we are now/about to save the database to db.txt. The site may go offline or slow lots during this. Shouldn't take long, just letting you know!"
-    })
-  }
-
-  if(query.toLowerCase() == "cheese"){
-    resultsJson.push({
-      "href":host,
-      "title":"Try searching something else",
-      "description":"Searching 'cheese' can often lead to spam. Try searching something else, like 'toe cheese' perhaps."
-    })
-  }
-
-  if(query.startsWith("hello")){
-    resultsJson.push({
-      "href":"https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-      "title":"Hello my child",
-      "description":"I think I have your answer here. Feel free to click! -coding398"
-    })
-  }
-
-  if(getRandomInt(1,25) == 20){
-    resultsJson.push({
-      "href":"https://cheesgle.com/Add/add.html",
-      "title":"<b>Not what you're looking for?</b>",
-      "description":"<b>Add a page to cheesgle! It won't take a second, I promise.</b>"
-    })
-  }
-  if(getRandomInt(1,100) == 69){
-    resultsJson.push({
-      "href":"https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-      "title":protect(query),
-      "description":protect(query)
-    })
-  }
-
-  for (let i = 0; i < results; i++) {
-    resultsJson.push({
-      "href":encodeURI(resp[i].item.u),
-      "title":protect(resp[i].item.t),
-      "description":protect(resp[i].item.dc)
-    })
-  }
-
-  // Typo checking
-  let checkingQuery = query.split(" ")
-  let outFromTheCheckingLab = []
-  checkingQuery.forEach((element)=>{
-    let suggest = dictionary.suggest(element)
-    if(suggest.length>0){
-      outFromTheCheckingLab.push(suggest[0])
-    }else{
-      outFromTheCheckingLab.push(element)
+    if(resp == undefined){
+      console.log(`No results found for query: ${query}`)
+      res.status(204)
+      res.end(JSON.stringify({
+        "error":true,
+        "reason":"No results found",
+        "code":"noResults"
+      }))
+      return
     }
-  })
 
-  res.end(JSON.stringify({
-    "error":false,
-    "resultsCount":allResults,
-    "timeInMs":timeTook,
-    "results":resultsJson,
-    "pages":pages,
-    "page":page,
-    "didYouMean":protect(outFromTheCheckingLab.join(" "))
-  }))
+    let results = resp.length
+    let resultsJson = []
+
+    if(query.toLowerCase() == "cheese"){
+      resultsJson.push({
+        "href":host,
+        "title":"Try searching something else",
+        "description":"Searching 'cheese' can often lead to spam. Try searching something else, like 'toe cheese' perhaps."
+      })
+    }
+
+    if(query.startsWith("hello")){
+      resultsJson.push({
+        "href":"https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+        "title":"Hello my child",
+        "description":"I think I have your answer here. Feel free to click! -coding398"
+      })
+    }
+
+    if(getRandomInt(1,25) == 20){
+      resultsJson.push({
+        "href":"https://cheesgle.com/Add/add.html",
+        "title":"<b>Not what you're looking for?</b>",
+        "description":"<b>Add a page to cheesgle! It won't take a second, I promise.</b>"
+      })
+    }
+    if(getRandomInt(1,100) == 69){
+      resultsJson.push({
+        "href":"https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+        "title":protect(query),
+        "description":protect(query)
+      })
+    }
+
+    for (let i = 0; i < results; i++) {
+      resultsJson.push({
+        "href":encodeURI(resp[i].item.u),
+        "title":protect(resp[i].item.t),
+        "description":protect(resp[i].item.dc)
+      })
+    }
+
+    // Typo checking
+    let checkingQuery = query.split(" ")
+    let outFromTheCheckingLab = []
+    checkingQuery.forEach((element)=>{
+      let suggest = dictionary.suggest(element)
+      if(suggest.length>0){
+        outFromTheCheckingLab.push(suggest[0])
+      }else{
+        outFromTheCheckingLab.push(element)
+      }
+    })
+
+    console.log(`From: ${censoredIp} Took: ${timeTook}s Results: ${allResults} Query: ${query}`)
+
+    res.end(JSON.stringify({
+      "error":false,
+      "resultsCount":allResults,
+      "timeInSeconds":timeTook,
+      "results":resultsJson,
+      "pages":pages,
+      "page":page,
+      "didYouMean":protect(outFromTheCheckingLab.join(" "))
+    }))
+  });
 })
 
 app.use('/submitSite', sumbitPageRateLimit)
