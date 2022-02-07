@@ -36,8 +36,8 @@ const sumbitPageRateLimit = rateLimit({
 })
 
 const searchRateLimit = rateLimit({
-	windowMs: 60 * 1000, // 1 Minute
-	max: 35,
+	windowMs: 120 * 1000, // 2 Minutes
+	max: 30,
 	message:
 		JSON.stringify({
     "error":true,
@@ -59,6 +59,7 @@ const { Worker } = require('worker_threads');
 const cheerio = require('cheerio');
 const axios = require('axios');
 var jsonpack = require("jsonpack")
+const Fuse = require('fuse.js')
 var Typo = require("typo-js");
 var fs = require("fs")
 
@@ -286,6 +287,16 @@ function queue(h,smh,sub){
   })
 }
 
+/* Searching and refreshing collection */
+var search = new Fuse(db.sites, {
+  keys: ['t', 'dc','kw'],
+  threshold:0.4,
+  minMatchCharLength:3
+})
+setInterval(() => {
+  search.setCollection(db.sites)
+}, 120000);
+
 /* Here you can manually queue sitemaps and websites upon runtime */
 
 [].forEach(element=>{crawlXml(element)});
@@ -300,6 +311,16 @@ const { time } = require('console');
 const cors = require('cors');
 const app = express()
 const port = 3000
+
+function chunk (arr, len) { // Chunk function from stackoverflow
+  var chunks = [],
+      i = 0,
+      n = arr.length;
+  while (i < n) {
+    chunks.push(arr.slice(i, i += len));
+  }
+  return chunks;
+}
 
 //Init Typo
 var dictionary = new Typo("en_US");
@@ -333,7 +354,7 @@ function protect(text) { // Replaces stuff with stuff
 }
 
 app.use('/api/',searchRateLimit)
-app.get('/api/:query/:page*?', (req, res) => {
+app.get('/api/:query/:page*?', async(req, res) => {
 
   res.setHeader('content-type', 'application/json');
 
@@ -374,11 +395,11 @@ app.get('/api/:query/:page*?', (req, res) => {
     }));return
   }
 
-  if(query.length > 30){
+  if(query.length > 50){
     console.log(`Query too long for '${query}'`)
     res.status(400);res.end(JSON.stringify({
       "error":true,
-      "reason":"Query too long, please have a query under 30 characters long.",
+      "reason":"Query too long, please have a query under 50 characters long.",
       "code":"tooLong"
     }));return
   }
@@ -403,96 +424,94 @@ app.get('/api/:query/:page*?', (req, res) => {
   }
 
   const time1 = performance.now(); // Gets the current time in ms
+  var resp = await search.search(query) // Search with query
+  const allResults = resp.length
+  resp=chunk(resp,pageSize) // Chunk into pages
+  const pages = resp.length
 
-  const worker = new Worker('./search.js', { 
-      workerData: {
-        db:db.sites,
-        query:query,
-        page:page,
-        pageSize:pageSize
-      }
-  });
-  worker.once('message', (result) => {
-    var {resp,allResults,pages,timeTook} = result
+  if(page>pages || page<1){page=1};page=Math.round(page);
+  resp=resp[page-1]
 
-    if(resp == undefined){
-      console.log(`No results found for query: ${query}`)
-      res.status(204)
-      res.end(JSON.stringify({
-        "error":true,
-        "reason":"No results found",
-        "code":"noResults"
-      }))
-      return
-    }
+  const timeTook = ((Math.round(performance.now()-time1)% 60000) / 1000).toFixed(2);
+  
 
-    let results = resp.length
-    let resultsJson = []
-
-    if(query.toLowerCase() == "cheese"){
-      resultsJson.push({
-        "href":host,
-        "title":"Try searching something else",
-        "description":"Searching 'cheese' can often lead to spam. Try searching something else, like 'toe cheese' perhaps."
-      })
-    }
-
-    if(query.startsWith("hello")){
-      resultsJson.push({
-        "href":"https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-        "title":"Hello my child",
-        "description":"I think I have your answer here. Feel free to click! -coding398"
-      })
-    }
-
-    if(getRandomInt(1,25) == 20){
-      resultsJson.push({
-        "href":"https://cheesgle.com/Add/add.html",
-        "title":"<b>Not what you're looking for?</b>",
-        "description":"<b>Add a page to cheesgle! It won't take a second, I promise.</b>"
-      })
-    }
-    if(getRandomInt(1,100) == 69){
-      resultsJson.push({
-        "href":"https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-        "title":protect(query),
-        "description":protect(query)
-      })
-    }
-
-    for (let i = 0; i < results; i++) {
-      resultsJson.push({
-        "href":encodeURI(resp[i].item.u),
-        "title":protect(resp[i].item.t),
-        "description":protect(resp[i].item.dc)
-      })
-    }
-
-    // Typo checking
-    let checkingQuery = query.split(" ")
-    let outFromTheCheckingLab = []
-    checkingQuery.forEach((element)=>{
-      let suggest = dictionary.suggest(element)
-      if(suggest.length>0){
-        outFromTheCheckingLab.push(suggest[0])
-      }else{
-        outFromTheCheckingLab.push(element)
-      }
-    })
-
-    console.log(`From: ${censoredIp} Took: ${timeTook}s Results: ${allResults} Query: ${query}`)
-
+  if(resp == undefined){
+    console.log(`No results found for query: ${query}`)
+    res.status(204)
     res.end(JSON.stringify({
-      "error":false,
-      "resultsCount":allResults,
-      "timeInSeconds":timeTook,
-      "results":resultsJson,
-      "pages":pages,
-      "page":page,
-      "didYouMean":protect(outFromTheCheckingLab.join(" "))
+      "error":true,
+      "reason":"No results found",
+      "code":"noResults"
     }))
-  });
-})
+    return
+  }
+
+  let results = resp.length
+  let resultsJson = []
+
+  if(query.toLowerCase() == "cheese"){
+    resultsJson.push({
+      "href":host,
+      "title":"Try searching something else",
+      "description":"Searching 'cheese' can often lead to spam. Try searching something else, like 'toe cheese' perhaps."
+    })
+  }
+
+  if(query.startsWith("hello")){
+    resultsJson.push({
+      "href":"https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      "title":"Hello my child",
+      "description":"I think I have your answer here. Feel free to click! -coding398"
+    })
+  }
+
+  if(getRandomInt(1,25) == 20){
+    resultsJson.push({
+      "href":"https://cheesgle.com/Add/add.html",
+      "title":"<b>Not what you're looking for?</b>",
+      "description":"<b>Add a page to cheesgle! It won't take a second, I promise.</b>"
+    })
+  }
+  if(getRandomInt(1,100) == 69){
+    resultsJson.push({
+      "href":"https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      "title":protect(query),
+      "description":protect(query)
+    })
+  }
+
+  for (let i = 0; i < results; i++) {
+    resultsJson.push({
+      "href":encodeURI(resp[i].item.u),
+      "title":protect(resp[i].item.t),
+      "description":protect(resp[i].item.dc)
+    })
+  }
+
+  // Typo checking
+  let checkingQuery = query.split(" ")
+  let outFromTheCheckingLab = []
+  checkingQuery.forEach((element)=>{
+    let suggest = dictionary.suggest(element)
+    if(suggest.length>0){
+      outFromTheCheckingLab.push(suggest[0])
+    }else{
+      outFromTheCheckingLab.push(element)
+    }
+  })
+
+  console.log(`From: ${censoredIp} Took: ${timeTook}s Results: ${allResults} Query: ${query}`)
+
+  res.end(JSON.stringify({
+    "error":false,
+    "resultsCount":allResults,
+    "timeInSeconds":timeTook,
+    "results":resultsJson,
+    "pages":pages,
+    "page":page,
+    "didYouMean":protect(outFromTheCheckingLab.join(" "))
+  }))
+});
 
 app.use('/submitSite', sumbitPageRateLimit)
 
