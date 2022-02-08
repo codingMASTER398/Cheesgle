@@ -75,7 +75,7 @@ if(!isNaN(Number(page))){
           didYouMean = `<h3>Did you meen <a href="search.html?q=${encodeURIComponent(json.didYouMean)}">${json.didYouMean}</a>?</h3>`
         }
     
-        let resultsHtml = `<div class="topResults">${json.resultsCount} results for '${protect(query)}' found in aboot ${json.timeInSeconds} seconds.</p>${didYouMean}
+        let resultsHtml = `<div class="topResults">${json.resultsCount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} results for '${protect(query)}' found in aboot ${json.timeInSeconds} seconds.</p>${didYouMean}
     </div>
     <br>
     ${results}
