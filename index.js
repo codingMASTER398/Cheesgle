@@ -59,7 +59,7 @@ const { Worker } = require('worker_threads');
 const cheerio = require('cheerio');
 const axios = require('axios');
 var jsonpack = require("jsonpack")
-const Fuse = require('fuse.js')
+const MiniSearch = require('minisearch')
 var Typo = require("typo-js");
 var fs = require("fs")
 
@@ -288,14 +288,17 @@ function queue(h,smh,sub){
 }
 
 /* Searching and refreshing collection */
-var search = new Fuse(db.sites, {
-  keys: ['t', 'dc','kw'],
-  threshold:0.4,
-  minMatchCharLength:3
+var search = new MiniSearch({
+  fields: ['t','dc','kw'], // fields to index for full-text search
+  storeFields: ['t', 'u','dc'], // fields to return with search results
+  idField: 'u'
 })
-setInterval(() => {
-  search.setCollection(db.sites)
-}, 120000);
+search.addAll(db.sites)
+
+setInterval(async () => {
+  await search.removeAll()
+  await search.addAll(db.sites)
+}, 2000000);
 
 /* Here you can manually queue sitemaps and websites upon runtime */
 
@@ -360,7 +363,7 @@ app.get('/api/:query/:page*?', async(req, res) => {
 
   /*res.status(503);res.end(JSON.stringify({
     "error":true,
-    "reason":"Maintenace is underway. Sorry for the inconvenicence.",
+    "reason":"Maintenace is underway. Not sorry for the inconvenicence.",
     "code":"maintenance"
   }));return*/
 
@@ -370,8 +373,6 @@ app.get('/api/:query/:page*?', async(req, res) => {
   if(isNaN(Number(page))){
     page = 1
   }
-
-  console.log(`Processing query: ${query}`)
 
   if(!query){res.status(400);res.end(JSON.stringify({
     "error":true,
@@ -482,9 +483,9 @@ app.get('/api/:query/:page*?', async(req, res) => {
 
   for (let i = 0; i < results; i++) {
     resultsJson.push({
-      "href":encodeURI(resp[i].item.u),
-      "title":protect(resp[i].item.t),
-      "description":protect(resp[i].item.dc)
+      "href":encodeURI(resp[i].u),
+      "title":protect(resp[i].t.replace(/&quot;/g, '\\"')),
+      "description":protect(resp[i].dc.replace(/&quot;/g, "'"))
     })
   }
 
@@ -570,7 +571,7 @@ app.get('/Verified/list.json',(req,res)=>{
 
 app.get('/pageCount',(req,res)=>{
   if(canqueue){
-    res.end(`Cheesgle is proudly tasting ${db.sites.length} pages.`)
+    res.end(`Cheesgle is proudly tasting ${db.sites.length.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} pages.`)
   }else{
     res.end(`Cheesgle has capped out at ${db.sites.length} pages and no more can be added for the time being.`)
   }
