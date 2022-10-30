@@ -19,9 +19,13 @@
     "typo-js": "^1.2.1"
   },
   "scripts": {
-    "start": "node index.js"
+    "start": "node index.js",
+    "format": "prettier --write ."
   },
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "prettier": "2.7.1"
+  }
 }

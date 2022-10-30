@@ -1,66 +1,65 @@
-.topimg{
-    width:15%;
+.topimg {
+  width: 15%;
 }
-.top{
-    width:90%;
-    height: 30%;
-    display: flex;
-    align-items: center;
+.top {
+  width: 90%;
+  height: 30%;
+  display: flex;
+  align-items: center;
 }
-.padding{
-    padding: 30px 30px;
+.padding {
+  padding: 30px 30px;
 }
-.morePadding{
-    padding: 20px 20px;
+.morePadding {
+  padding: 20px 20px;
 }
-.top input{
-    padding: 10px 10px;
-    width: 30%;
-    border:0px;
-    box-shadow: 0 1px 3px rgba(23,23,23,0.24);
+.top input {
+  padding: 10px 10px;
+  width: 30%;
+  border: 0px;
+  box-shadow: 0 1px 3px rgba(23, 23, 23, 0.24);
 }
-.top button{
-    padding: 10px 10px;
-    width: 5%;
-    border:0px;
-    box-shadow: 0 1px 3px rgba(23,23,23,0.24);
-    transition: 0.5s;
+.top button {
+  padding: 10px 10px;
+  width: 5%;
+  border: 0px;
+  box-shadow: 0 1px 3px rgba(23, 23, 23, 0.24);
+  transition: 0.5s;
 }
-.top button:hover{
-    box-shadow: 0 1px 3px rgba(23,23,23,0.5);
-    color: orange;
-}
-
-@media screen and (max-width: 800px) {
-    .top input{
-        width: 60%;
-    }
-    .topimg{
-        width: 40%;
-    }
-    .top button{
-        width: 10%;
-    }
-}
-
-*{
-    font-family: Verdana, Geneva, Tahoma, sans-serif;
-}
-
-
-.bottom button{
-    padding: 10px 10px;
-    border:0px;
-    box-shadow: 0 1px 3px rgba(23,23,23,0.24);
-    transition: 0.5s;
-    font-size: large;
+.top button:hover {
+  box-shadow: 0 1px 3px rgba(23, 23, 23, 0.5);
+  color: orange;
 }
 
 @media screen and (max-width: 800px) {
-    .page{
-        font-size: x-large;
-    }
-    .page button{
-        font-size: x-large;
-    }
+  .top input {
+    width: 60%;
+  }
+  .topimg {
+    width: 40%;
+  }
+  .top button {
+    width: 10%;
+  }
+}
+
+* {
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+}
+
+.bottom button {
+  padding: 10px 10px;
+  border: 0px;
+  box-shadow: 0 1px 3px rgba(23, 23, 23, 0.24);
+  transition: 0.5s;
+  font-size: large;
+}
+
+@media screen and (max-width: 800px) {
+  .page {
+    font-size: x-large;
+  }
+  .page button {
+    font-size: x-large;
+  }
 }

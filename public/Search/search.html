@@ -1,51 +1,80 @@
 <!--Setup basic html-->
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <title id="title">Cheesgle | Search</title>
-        <script>
-            function getParameterByName(name){
-                return new URLSearchParams(window.location.search).get(name);
-            }
-            if(getParameterByName('q')){
-                document.getElementById("title").innerText = "Cheesgle | "+getParameterByName('q')
-            }
-        </script>
-        <meta charset="UTF-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <script src="https://kit.fontawesome.com/6570195b29.js" crossorigin="anonymous"></script>
-        <!--Add search.css-->
-        <link rel="stylesheet" href="./search.css">
-        <meta name="viewport" content="width=device-width, initial-scale=0.75">
+  <head>
+    <meta charset="UTF-8" />
+    <title id="title">Cheesgle | Search</title>
+    <script>
+      function getParameterByName(name) {
+        return new URLSearchParams(window.location.search).get(name);
+      }
+      if (getParameterByName("q")) {
+        document.getElementById("title").innerText =
+          "Cheesgle | " + getParameterByName("q");
+      }
+    </script>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <script
+      src="https://kit.fontawesome.com/6570195b29.js"
+      crossorigin="anonymous"
+    ></script>
+    <!--Add search.css-->
+    <link rel="stylesheet" href="./search.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=0.75" />
 
-        <script defer src="./search.js"></script>
-    </head>
-    <body>
-        <div class="padding">
-            <div class="top">
-                <!-- Create an img of cheesgle_long.png -->
-                <img class="topimg" src="../Img/cheesgle_long.png" onclick="window.location.href = '../index.html'">
-                <!-- Create a search input next to the image WITHOUT a form -->
-                <input type="search" class="searchbar" placeholder="Regret..." name="q">
-                <button onclick="newSearch()"><i class="fa-solid fa-magnifying-glass"></i></button>
-            </div>
-            <div class="morePadding">
-                <div class="statusDiv">
-                    <img src="../Img/cheese.png" class="cheeseSmall rotate" id="searchingCheese">
-                    <img src="../Img/mouldy_cheese.png" class="cheeseSmall" id="searchingMould" hidden>
-                    <p class="status">Searching...</p>
-                    <br>
-                </div>
-                <div class="bottom">
-                    <button onclick="window.location.href = '../github'"><i class="fa-brands fa-github"></i></button>
-                    <button onclick="window.location.href = '../About/about.html'"><i class="fa-solid fa-circle-question"></i></button>
-                    <button onclick="window.location.href = '../Credits/credits.html'"><i class="fa-solid fa-scroll"></i></button>
-                    <br><br>
-                    <a href="../Add/add.html">Sumbit a website</a>
-                </div>
-            </div>
-        
+    <script defer src="./search.js"></script>
+  </head>
+  <body>
+    <div class="padding">
+      <div class="top">
+        <!-- Create an img of cheesgle_long.png -->
+        <img
+          class="topimg"
+          src="../Img/cheesgle_long.png"
+          onclick="window.location.href = '../index.html'"
+        />
+        <!-- Create a search input next to the image WITHOUT a form -->
+        <input
+          type="search"
+          class="searchbar"
+          placeholder="Regret..."
+          name="q"
+        />
+        <button onclick="newSearch()">
+          <i class="fa-solid fa-magnifying-glass"></i>
+        </button>
+      </div>
+      <div class="morePadding">
+        <div class="statusDiv">
+          <img
+            src="../Img/cheese.png"
+            class="cheeseSmall rotate"
+            id="searchingCheese"
+          />
+          <img
+            src="../Img/mouldy_cheese.png"
+            class="cheeseSmall"
+            id="searchingMould"
+            hidden
+          />
+          <p class="status">Searching...</p>
+          <br />
         </div>
-    </body>
+        <div class="bottom">
+          <button onclick="window.location.href = '../github'">
+            <i class="fa-brands fa-github"></i>
+          </button>
+          <button onclick="window.location.href = '../About/about.html'">
+            <i class="fa-solid fa-circle-question"></i>
+          </button>
+          <button onclick="window.location.href = '../Credits/credits.html'">
+            <i class="fa-solid fa-scroll"></i>
+          </button>
+          <br /><br />
+          <a href="../Add/add.html">Sumbit a website</a>
+        </div>
+      </div>
+    </div>
+  </body>
 </html>
