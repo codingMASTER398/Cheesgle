@@ -1,50 +1,50 @@
-.topimg{
-    width:15%;
+.topimg {
+  width: 15%;
 }
-.top{
-    width:90%;
-    height: 30%;
-    display: flex;
-    align-items: center;
+.top {
+  width: 90%;
+  height: 30%;
+  display: flex;
+  align-items: center;
 }
-.padding{
-    padding: 15px 15px;
+.padding {
+  padding: 15px 15px;
 }
-.morePadding{
-    padding: 20px 20px;
+.morePadding {
+  padding: 20px 20px;
 }
-.top input{
-    padding: 10px 10px;
-    width: 30%;
-    border:0px;
-    box-shadow: 0 1px 3px rgba(23,23,23,0.24);
+.top input {
+  padding: 10px 10px;
+  width: 30%;
+  border: 0px;
+  box-shadow: 0 1px 3px rgba(23, 23, 23, 0.24);
 }
-.top button{
-    padding: 10px 10px;
-    width: 5%;
-    border:0px;
-    box-shadow: 0 1px 3px rgba(23,23,23,0.24);
-    transition: 0.5s;
+.top button {
+  padding: 10px 10px;
+  width: 5%;
+  border: 0px;
+  box-shadow: 0 1px 3px rgba(23, 23, 23, 0.24);
+  transition: 0.5s;
 }
-.top button:hover{
-    box-shadow: 0 1px 3px orange;
-    color: orange;
+.top button:hover {
+  box-shadow: 0 1px 3px orange;
+  color: orange;
 }
 
 @media screen and (max-width: 800px) {
-    .top input{
-        width: 60%;
-    }
-    .topimg{
-        width: 40%;
-    }
-    .top button{
-        width: 10%;
-    }
+  .top input {
+    width: 60%;
+  }
+  .topimg {
+    width: 40%;
+  }
+  .top button {
+    width: 10%;
+  }
 }
 
-*{
-    font-family: Verdana, Geneva, Tahoma, sans-serif;
+* {
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
 }
 
 /*
@@ -61,82 +61,78 @@ input[type="checkbox"]:hover{
 }
 */
 
-.result{
+.result {
   padding: 6px;
 }
 
-.result p{
-    margin: 0;
+.result p {
+  margin: 0;
 }
-.result .description{
-    font-size: large;
+.result .description {
+  font-size: large;
 }
-.result .urlText{
-    font-size: smaller;
-    color: grey;
+.result .urlText {
+  font-size: smaller;
+  color: grey;
 }
-.result a{
+.result a {
   margin: 0;
   font-size: larger;
   transition: 0.25s;
 }
-.result a:hover{
+.result a:hover {
   color: cyan;
   transition: 0.25s;
 }
 
-.bottom button{
-    padding: 10px 10px;
-    border:0px;
-    box-shadow: 0 1px 3px rgba(23,23,23,0.24);
-    transition: 0.5s;
-    font-size: large;
+.bottom button {
+  padding: 10px 10px;
+  border: 0px;
+  box-shadow: 0 1px 3px rgba(23, 23, 23, 0.24);
+  transition: 0.5s;
+  font-size: large;
 }
 
-.topResults{
-    font-size: small;
+.topResults {
+  font-size: small;
 }
 
-.page{
-    display: flex;
-    align-items: center;
+.page {
+  display: flex;
+  align-items: center;
 }
 
-.page button{
-    border:none;
+.page button {
+  border: none;
 }
 
 @media screen and (max-width: 800px) {
-    .page{
-        font-size: x-large;
-    }
-    .page button{
-        font-size: x-large;
-    }
+  .page {
+    font-size: x-large;
+  }
+  .page button {
+    font-size: x-large;
+  }
 }
 
-.cheeseSmall{
-    width: 2.5%;
+.cheeseSmall {
+  width: 2.5%;
 }
 
-.rotate{
-    animation: rotation 0.6s infinite linear;
+.rotate {
+  animation: rotation 0.6s infinite linear;
 }
 
 @keyframes rotation {
-    from {
-      transform: rotate(0deg);
-    }
-    to {
-      transform: rotate(359deg);
-    }
+  from {
+    transform: rotate(0deg);
   }
+  to {
+    transform: rotate(359deg);
+  }
+}
 
 .material-symbols-outlined {
-  font-variation-settings:
-  'FILL' 1,
-  'wght' 400,
-  'GRAD' 0,
-  'opsz' 48;
+  font-variation-settings: "FILL" 1, "wght" 400, "GRAD" 0, "opsz" 48;
   font-size: inherit !important;
 }

@@ -1,60 +1,96 @@
 <!--Setup basic html-->
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <title>Cheesgle | About verified sites</title>
-        <meta charset="UTF-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
-        <!--Add search.css-->
-        <link rel="stylesheet" href="./about.css">
-        <meta name="viewport" content="width=device-width, initial-scale=0.75">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Cheesgle | About verified sites</title>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+    />
+    <!--Add search.css-->
+    <link rel="stylesheet" href="./about.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=0.75" />
 
-        <script defer src="./about.js"></script>
+    <script defer src="./about.js"></script>
 
-        <link rel="icon" type="image/png" href="../Cheesgle.png">
+    <link rel="icon" type="image/png" href="../Cheesgle.png" />
 
-        <meta charset="UTF-8">
-        <meta name="description" content="About Cheesgle's verified pages">
-        <meta name="keywords" content="cheese,cheesey,cheesgle,cheese search engine,bad search engine, worst search engine, useless search engine ">
+    <meta charset="UTF-8" />
+    <meta name="description" content="About Cheesgle's verified pages" />
+    <meta
+      name="keywords"
+      content="cheese,cheesey,cheesgle,cheese search engine,bad search engine, worst search engine, useless search engine "
+    />
 
-        <!-- Global site tag (gtag.js) - Google Analytics -->
-        <script async src="https://www.googletagmanager.com/gtag/js?id=G-9PX18FBQGB"></script>
-        <script>
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script
+      async
+      src="https://www.googletagmanager.com/gtag/js?id=G-9PX18FBQGB"
+    ></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
 
-          gtag('config', 'G-9PX18FBQGB');
-        </script>
-    </head>
-    <body>
-        <div class="padding">
-            <div class="top">
-                <!-- Create an img of cheesgle_long.png -->
-                <img class="topimg" src="../Img/cheesgle_long.png" onclick="window.location.href = '../index.html'">
+      gtag("config", "G-9PX18FBQGB");
+    </script>
+  </head>
+  <body>
+    <div class="padding">
+      <div class="top">
+        <!-- Create an img of cheesgle_long.png -->
+        <img
+          class="topimg"
+          src="../Img/cheesgle_long.png"
+          onclick="window.location.href = '../index.html'"
+        />
 
-                <!-- Create a search input next to the image WITHOUT a form -->
-                <input type="search" class="searchbar" placeholder="Regret..." name="q">
-                <button onclick="newSearch()"><span class="material-symbols-outlined">search</span></button>
-            </div>
-            <div class="morePadding">
-                <h1><span class="material-symbols-outlined">check</span> About verified sites</h1>
-                <p>Verified sites are basically our way to filter out spam.<br>Verified sites have the <span class="material-symbols-outlined">check</span> next to them in search results, so you can easily spot them out.
-                <br>They can also have more pages crawled overall (see <a href="../Add/add.html">add a page</a>).
-                <br>If you would like a website to be verified, join my <a href="https://discord.gg/xBKHUgyT3X">Discord.</a>
-                </p>
-                <br>
-                <div class="bottom">
-                    <button onclick="window.location.href = '../github'"><span class="material-symbols-outlined">code</span></button>
-                    <button onclick="window.location.href = '../About/about.html'"><span class="material-symbols-outlined">question_mark</span></button>
-                    <button onclick="window.location.href = '../Credits/credits.html'"><span class="material-symbols-outlined">summarize</span></button>
-                    <br><br>
-                    <a href="../Add/add.html">Sumbit a website</a>
-                </div>
-            </div>
-        
+        <!-- Create a search input next to the image WITHOUT a form -->
+        <input
+          type="search"
+          class="searchbar"
+          placeholder="Regret..."
+          name="q"
+        />
+        <button onclick="newSearch()">
+          <span class="material-symbols-outlined">search</span>
+        </button>
+      </div>
+      <div class="morePadding">
+        <h1>
+          <span class="material-symbols-outlined">check</span> About verified
+          sites
+        </h1>
+        <p>
+          Verified sites are basically our way to filter out spam.<br />Verified
+          sites have the
+          <span class="material-symbols-outlined">check</span> next to them in
+          search results, so you can easily spot them out. <br />They can also
+          have more pages crawled overall (see
+          <a href="../Add/add.html">add a page</a>). <br />If you would like a
+          website to be verified, join my
+          <a href="https://discord.gg/xBKHUgyT3X">Discord.</a>
+        </p>
+        <br />
+        <div class="bottom">
+          <button onclick="window.location.href = '../github'">
+            <span class="material-symbols-outlined">code</span>
+          </button>
+          <button onclick="window.location.href = '../About/about.html'">
+            <span class="material-symbols-outlined">question_mark</span>
+          </button>
+          <button onclick="window.location.href = '../Credits/credits.html'">
+            <span class="material-symbols-outlined">summarize</span>
+          </button>
+          <br /><br />
+          <a href="../Add/add.html">Sumbit a website</a>
         </div>
-    </body>
+      </div>
+    </div>
+  </body>
 </html>

@@ -1,65 +1,96 @@
 <!DOCTYPE html>
-<html lang="en" >
-<head>
-  <meta charset="UTF-8">
-  <title>Cheesgle</title>
-  <meta charset="UTF-8">
-	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Cheesgle | World's worst cheesey search engine</title><link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/normalize/7.0.0/normalize.min.css'><link rel="stylesheet" href="./style.css">
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Cheesgle</title>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cheesgle | World's worst cheesey search engine</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/normalize/7.0.0/normalize.min.css"
+    />
+    <link rel="stylesheet" href="./style.css" />
 
-  <link rel="icon" type="image/png" href="./Cheesgle.png">
+    <link rel="icon" type="image/png" href="./Cheesgle.png" />
 
-  <meta charset="UTF-8">
-  <meta name="description" content="Cheesgle is the world's worst and most useless search engine, only indexing sites about cheese. Regret today!">
-  <meta name="keywords" content="cheese,cheesey,cheesgle,cheese search engine,bad search engine, worst search engine, useless search engine ">
+    <meta charset="UTF-8" />
+    <meta
+      name="description"
+      content="Cheesgle is the world's worst and most useless search engine, only indexing sites about cheese. Regret today!"
+    />
+    <meta
+      name="keywords"
+      content="cheese,cheesey,cheesgle,cheese search engine,bad search engine, worst search engine, useless search engine "
+    />
 
-  <!-- Global site tag (gtag.js) - Google Analytics -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-9PX18FBQGB"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script
+      async
+      src="https://www.googletagmanager.com/gtag/js?id=G-9PX18FBQGB"
+    ></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
 
-    gtag('config', 'G-9PX18FBQGB');
-  </script>
-</head>
-<body>
-<!-- partial:index.partial.html -->
-<div class="main">
-		
-		<!-- Home Page -->
+      gtag("config", "G-9PX18FBQGB");
+    </script>
+  </head>
+  <body>
+    <!-- partial:index.partial.html -->
+    <div class="main">
+      <!-- Home Page -->
 
-		<div class="home">
-			<div class="container">
-				<div class="row">
-					<div class="eight columns offset-by-two">
-						<img src="./Img/cheesgle_long.png">
-					</div>
-				</div>
+      <div class="home">
+        <div class="container">
+          <div class="row">
+            <div class="eight columns offset-by-two">
+              <img src="./Img/cheesgle_long.png" />
+            </div>
+          </div>
 
-				<div class="row">
-					<div class="eight columns offset-by-two">
-						<form action="Search/search.html" class="wiki-search-form" method="GET">
-							<input type="search" placeholder="Regret..." class="wiki-search-input" id="wiki-search-input" name="q">
-							<button class="button btn btn-wiki">Search</button>
-							<a class="button btn btn-lucky" href="https://byte.cheesgle.com">Byte One</a>
-              <a class="button btn btn-lucky" href="https://discord.gg/c7VeeZV9E2">Corp</a>
-						</form>
-						<p>The world's best worst search engine.</p>
-						<p id="websites"></p>
-						<script>
-							fetch("./pageCount").then(async function(r) {
-								document.getElementById("websites").innerText = await r.text()
-							})
-						</script>
-					</div>
-				</div>
-				</div>
-			</div>
+          <div class="row">
+            <div class="eight columns offset-by-two">
+              <form
+                action="Search/search.html"
+                class="wiki-search-form"
+                method="GET"
+              >
+                <input
+                  type="search"
+                  placeholder="Regret..."
+                  class="wiki-search-input"
+                  id="wiki-search-input"
+                  name="q"
+                />
+                <button class="button btn btn-wiki">Search</button>
+                <a class="button btn btn-lucky" href="https://byte.cheesgle.com"
+                  >Byte One</a
+                >
+                <a
+                  class="button btn btn-lucky"
+                  href="https://discord.gg/c7VeeZV9E2"
+                  >Corp</a
+                >
+              </form>
+              <p>The world's best worst search engine.</p>
+              <p id="websites"></p>
+              <script>
+                fetch("./pageCount").then(async function (r) {
+                  document.getElementById("websites").innerText =
+                    await r.text();
+                });
+              </script>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-	</div>
-<!-- partial -->
-  <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js'></script>
-</body>
+    <!-- partial -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+  </body>
 </html>

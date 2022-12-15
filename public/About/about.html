@@ -1,59 +1,91 @@
 <!--Setup basic html-->
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <title>Cheesgle | About</title>
-        <meta charset="UTF-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
-        <!--Add search.css-->
-        <link rel="stylesheet" href="./about.css">
-        <meta name="viewport" content="width=device-width, initial-scale=0.75">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Cheesgle | About</title>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+    />
+    <!--Add search.css-->
+    <link rel="stylesheet" href="./about.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=0.75" />
 
-        <script defer src="./about.js"></script>
+    <script defer src="./about.js"></script>
 
-        <link rel="icon" type="image/png" href="../Cheesgle.png">
+    <link rel="icon" type="image/png" href="../Cheesgle.png" />
 
-        <meta charset="UTF-8">
-  <meta name="description" content="About Cheesgle">
-  <meta name="keywords" content="cheese,cheesey,cheesgle,cheese search engine,bad search engine, worst search engine, useless search engine ">
-  
-        <!-- Global site tag (gtag.js) - Google Analytics -->
-        <script async src="https://www.googletagmanager.com/gtag/js?id=G-9PX18FBQGB"></script>
-        <script>
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
+    <meta charset="UTF-8" />
+    <meta name="description" content="About Cheesgle" />
+    <meta
+      name="keywords"
+      content="cheese,cheesey,cheesgle,cheese search engine,bad search engine, worst search engine, useless search engine "
+    />
 
-          gtag('config', 'G-9PX18FBQGB');
-        </script>
-    </head>
-    <body>
-        <div class="padding">
-            <div class="top">
-                <!-- Create an img of cheesgle_long.png -->
-                <img class="topimg" src="../Img/cheesgle_long.png" onclick="window.location.href = '../index.html'">
-                <!-- Create a search input next to the image WITHOUT a form -->
-                <input type="search" class="searchbar" placeholder="Regret..." name="q">
-                <button onclick="newSearch()"><span class="material-symbols-outlined">search</span></button>
-            </div>
-            <div class="morePadding">
-                <h1><i class="fa-solid fa-cheese"></i> What is Cheesgle?</h1><br>
-                <p>Cheesgle is the world's best worst search engine.<br>We only index websites that are about cheese, making this search engine yet more useless.
-                <br>Start searching <a href="../index.html">here</a>, and submit a page <a href="../Add/add.html">here</a>.<br>
-                Credits are <a href="../Credits/credits.html">here.</a></p>
-                <p id="websites">...</p>
-                <br>
-                <div class="bottom">
-                    <button onclick="window.location.href = '../github'"><span class="material-symbols-outlined">code</span></button>
-                    <button onclick="window.location.href = '../About/about.html'"><span class="material-symbols-outlined">question_mark</span></button>
-                    <button onclick="window.location.href = '../Credits/credits.html'"><span class="material-symbols-outlined">summarize</span></button>
-                    <br><br>
-                    <a href="../Add/add.html">Submit a website</a>
-                </div>
-            </div>
-        
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script
+      async
+      src="https://www.googletagmanager.com/gtag/js?id=G-9PX18FBQGB"
+    ></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
+
+      gtag("config", "G-9PX18FBQGB");
+    </script>
+  </head>
+  <body>
+    <div class="padding">
+      <div class="top">
+        <!-- Create an img of cheesgle_long.png -->
+        <img
+          class="topimg"
+          src="../Img/cheesgle_long.png"
+          onclick="window.location.href = '../index.html'"
+        />
+        <!-- Create a search input next to the image WITHOUT a form -->
+        <input
+          type="search"
+          class="searchbar"
+          placeholder="Regret..."
+          name="q"
+        />
+        <button onclick="newSearch()">
+          <span class="material-symbols-outlined">search</span>
+        </button>
+      </div>
+      <div class="morePadding">
+        <h1><i class="fa-solid fa-cheese"></i> What is Cheesgle?</h1>
+        <br />
+        <p>
+          Cheesgle is the world's best worst search engine.<br />We only index
+          websites that are about cheese, making this search engine yet more
+          useless. <br />Start searching <a href="../index.html">here</a>, and
+          submit a page <a href="../Add/add.html">here</a>.<br />
+          Credits are <a href="../Credits/credits.html">here.</a>
+        </p>
+        <p id="websites">...</p>
+        <br />
+        <div class="bottom">
+          <button onclick="window.location.href = '../github'">
+            <span class="material-symbols-outlined">code</span>
+          </button>
+          <button onclick="window.location.href = '../About/about.html'">
+            <span class="material-symbols-outlined">question_mark</span>
+          </button>
+          <button onclick="window.location.href = '../Credits/credits.html'">
+            <span class="material-symbols-outlined">summarize</span>
+          </button>
+          <br /><br />
+          <a href="../Add/add.html">Submit a website</a>
         </div>
-    </body>
+      </div>
+    </div>
+  </body>
 </html>
