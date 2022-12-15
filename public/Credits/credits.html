@@ -1,0 +1,99 @@
+<!--Setup basic html-->
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Cheesgle | Credits</title>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+        <!--Add search.css-->
+        <link rel="stylesheet" href="./about.css">
+        <meta name="viewport" content="width=device-width, initial-scale=0.75">
+
+        <script defer src="./about.js"></script>
+
+        <link rel="icon" type="image/png" href="../Cheesgle.png">
+
+        <meta charset="UTF-8">
+  <meta name="description" content="The people who made the horrible thing known as Cheesgle">
+  <meta name="keywords" content="cheese,cheesey,cheesgle,cheese search engine,bad search engine, worst search engine, useless search engine ">
+
+        <!-- Global site tag (gtag.js) - Google Analytics -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-9PX18FBQGB"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+
+          gtag('config', 'G-9PX18FBQGB');
+        </script>
+    </head>
+    <body>
+        <div class="padding">
+            <div class="top">
+                <!-- Create an img of cheesgle_long.png -->
+                <img class="topimg" src="../Img/cheesgle_long.png" onclick="window.location.href = '../index.html'">
+
+                <!-- Create a search input next to the image WITHOUT a form -->
+                <input type="search" class="searchbar" placeholder="Regret..." name="q">
+                <button onclick="newSearch()"><span class="material-symbols-outlined">search</span></button>
+            </div>
+            <div class="morePadding">
+                <h1>Credits & license</h1>
+                <p>Created by <a href="https://coding398.dev/">coding398 (codingMASTER398)</a><br>
+                Not modified (add your name here if you modified this Cheesgle)<br>
+                index design by <a href="https://himmlai.com/">Himm Lai</a><br>
+                NPM modules used:
+                <ul>
+                    <li><b>body-parser</b> to parse form JSON when adding sites</li>
+                    <li><b>cors</b> for development purposes</li>
+                    <li><b>cheerio</b> for crawling</li>
+                    <li><b>axios</b> for crawling</li>
+                    <li><b>express</b> for... the entire website</li>
+                    <li><b>express-rate-limit</b> for stopping spammers</li>
+                    <li><b>minisearch</b> for really fast searches</li>
+                    <li><b>jsonpack</b> for compressing database</li>
+                    <li><b>robots-txt-parser</b> to parse robots.txt files</li>
+                    <li><b>sitemap-xml-parser</b> to parse sitemaps</li>
+                    <li><b>cheese-name</b> for the /randomCheese endpoint</li>
+                    <li><b>request-ip</b> for assisting express-rate-limit</li>
+                    <li><b>typo-js</b> did you mean results</li>
+                </ul>
+                <br>
+                <b>License:</b>
+                MIT License
+
+Copyright (c) 2022 coding398
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+                </p>
+                <br>
+                <div class="bottom">
+                    <button onclick="window.location.href = '../github'"><span class="material-symbols-outlined">code</span></button>
+                    <button onclick="window.location.href = '../About/about.html'"><span class="material-symbols-outlined">question_mark</span></button>
+                    <button onclick="window.location.href = '../Credits/credits.html'"><span class="material-symbols-outlined">summarize</span></button>
+                    <br><br>
+                    <a href="../Add/add.html">Submit a website</a>
+                </div>
+            </div>
+        
+        </div>
+    </body>
+</html>

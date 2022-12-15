@@ -1,0 +1,7 @@
+User-agent: *
+Disallow: /Search
+Allow: /
+Allow: /index.html
+Allow: /About/about.html
+Allow: /Credits/credits.html
+Allow: /Add/add.html
