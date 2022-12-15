@@ -48,6 +48,7 @@ if (!isNaN(Number(page))) {
 
 (async () => {
   var verified = (await (await fetch("../Verified/list.json")).json()) || [];
+  var cheeses = (await (await fetch("./cheeses.json")).json()) || [];
 
   fetch(urlToFetch)
     .then(async function (r) {
@@ -86,6 +87,21 @@ if (!isNaN(Number(page))) {
         )}">${json.didYouMean}</a>?</h3>`;
       }
 
+      let cheeseEmbed = "";
+      let titleParsed = query.trim().toLowerCase().replace(/ /g, "").replace(/'/g,"")
+      console.log(titleParsed)
+      for(let i=0; i<cheeses.length; i++){
+        if(cheeses[i].title == titleParsed){
+          cheeseEmbed = `<div id="cheeseEmbed">
+            <img src="${cheeses[i].image}">
+            <h2>${cheeses[i].displayTitle}</h2>
+            <p>Sourced fresh from cheese.com</p>
+            <button onclick="window.open('${cheeses[i].url}')">More info</button>
+            <button onclick="window.open('/randomcheese')">Random cheese</button>
+          </div>`
+        }
+      }
+
       let resultsHtml = `<div class="topResults">${json.resultsCount
         .toString()
         .replace(/\B(?=(\d{3})+(?!\d))/g, ",")} results for '${protect(
@@ -93,27 +109,28 @@ if (!isNaN(Number(page))) {
       )}' found in aboot ${json.timeInSeconds} seconds.</p>${didYouMean}
     </div>
     <br>
+    ${cheeseEmbed}
     ${results}
     <div class="page">
         <p>Page ${json.page}/${json.pages} <br> 
             <button onclick='window.location.href="search.html?q=${query
               .split(" ")
-              .join("%20")}"'><i class="fa-solid fa-angles-left"></i></button>
+              .join("%20")}"'><span class="material-symbols-outlined">first_page</span></button>
             <button onclick='window.location.href="search.html?q=${query
               .split(" ")
               .join("%20")}&page=${
         json.page - 1
-      }"'><i class="fa-solid fa-angle-left"></i></button> 
+      }"'><span class="material-symbols-outlined">arrow_back</span></button> 
             <button onclick='window.location.href="search.html?q=${query
               .split(" ")
               .join("%20")}&page=${
         json.page + 1
-      }"'><i class="fa-solid fa-angle-right"></i></button> 
+      }"'><span class="material-symbols-outlined">arrow_forward</span></button> 
             <button onclick='window.location.href="search.html?q=${query
               .split(" ")
               .join("%20")}&page=${
         json.pages
-      }"'><i class="fa-solid fa-angles-right"></i></button>
+      }"'><span class="material-symbols-outlined">last_page</span></button>
         </p>
     </div>
     <br><br>`;

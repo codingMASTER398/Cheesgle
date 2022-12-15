@@ -136,3 +136,36 @@ input[type="checkbox"]:hover{
   font-variation-settings: "FILL" 1, "wght" 400, "GRAD" 0, "opsz" 48;
   font-size: inherit !important;
 }
+
+#cheeseEmbed{
+  box-sizing: border-box;
+  padding: 6px;
+  background-color: #f5f5f5;
+  border-radius: 6px;
+  width: 600px;
+  overflow: auto;
+}
+
+#cheeseEmbed *{
+  margin: 12px;
+}
+
+#cheeseEmbed img{
+  float: right;
+  height: 150px;
+  padding-bottom: 12px;
+}
+
+#cheeseEmbed button {
+  padding: 10px 10px;
+  border: 0px;
+  box-shadow: 0 1px 3px rgba(23, 23, 23, 0.24);
+  transition: 0.5s;
+  margin-top: 0;
+}
+
+@media screen and (max-width: 800px) {
+  #cheeseEmbed{
+    width: 100%;
+  }
+}

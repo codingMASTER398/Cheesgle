@@ -125,7 +125,7 @@ const siteQueue = [];
 
 setInterval(() => {
   if (siteQueue.length > 0) {
-    actualQueue(siteQueue[0]);
+    actualQueue(siteQueue[Math.floor(Math.random()*siteQueue.length)]);
     siteQueue.shift();
   }
 }, 300);
@@ -136,12 +136,13 @@ function actualQueue(url) {
   axios
     .get(url, { headers: { "User-Agent": "Cheesgle-crawlie" } })
     .then((response) => {
-      console.log("ooo");
       if (response.status === 200) {
-        console.log("ayy");
         if (typeof response.data !== "string") return;
         const html = response.data;
         const $ = cheerio.load(html);
+
+        // Fix up the URL
+        url = new URL(response.config.url).href;
 
         let title = "No title";
         let desc = "No description";
@@ -251,11 +252,11 @@ function saveDatabase() {
     });
     saverWorker.once("message", () => {
       console.log("Saved database");
-      setTimeout(saveDatabase, 1200000);
+      setTimeout(saveDatabase, 300000);
     });
   }
 }
-setTimeout(saveDatabase, 2400000);
+setTimeout(saveDatabase, 300000);
 
 function queue(h, smh, sub) {
   return new Promise(async (resolve, reject) => {
@@ -288,8 +289,6 @@ function queue(h, smh, sub) {
       }
     }
     noCrawl.push(new URL(h).href);
-
-    console.log("b");
 
     if (!canqueue) {
       reject(
@@ -377,7 +376,7 @@ search.addAll(db.sites);
 setInterval(async () => {
   await search.removeAll();
   await search.addAll(db.sites);
-}, 2000000);
+}, 400000);
 
 /* Here you can manually queue sitemaps and websites upon runtime */
 
@@ -668,6 +667,13 @@ app.post("/submitSite", bodyParser.json(), async (req, res) => {
 
     if (req.body.url) {
       if (req.body.url.startsWith("https://")) {
+        if(siteQueue.includes(req.body.url)){
+          res.end(
+            `We're already gonna crawl this one.`
+          );
+          return;
+        }
+        
         if (req.body.url.endsWith(".xml")) {
           crawlXml(req.body.url);
           res.end(
